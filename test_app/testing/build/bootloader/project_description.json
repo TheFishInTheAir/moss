@@ -1,0 +1,22 @@
+{
+    "project_name":       "bootloader",
+    "project_path":       "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/bootloader/subproject",
+    "build_dir":          "/Users/ethanbreit/Documents/operatingsystem/test_app/build/bootloader",
+    "config_file":        "/Users/ethanbreit/Documents/operatingsystem/test_app/sdkconfig",
+    "config_defaults":    "",
+    "app_elf":            "bootloader.elf",
+    "app_bin":            "bootloader.bin",
+    "git_revision":       "v5.1-dev-644-g867745a05c-dirty",
+    "target":             "esp32",
+    "rev":                "0",
+    "phy_data_partition": "",
+    "monitor_baud" :      "115200",
+    "monitor_toolprefix": "xtensa-esp32-elf-",
+    "config_environment" : {
+        "COMPONENT_KCONFIGS" : "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/efuse/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_common/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_hw_support/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_system/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/freertos/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/hal/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/log/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/newlib/Kconfig;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/spi_flash/Kconfig",
+        "COMPONENT_KCONFIGS_PROJBUILD" : "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/bootloader/Kconfig.projbuild;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_app_format/Kconfig.projbuild;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_rom/Kconfig.projbuild;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esptool_py/Kconfig.projbuild;/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/partition_table/Kconfig.projbuild"
+    },
+    "build_components" : [ "bootloader", "bootloader_support", "efuse", "esp_app_format", "esp_common", "esp_hw_support", "esp_rom", "esp_system", "esptool_py", "freertos", "hal", "log", "main", "micro-ecc", "newlib", "partition_table", "soc", "spi_flash", "xtensa", "" ],
+    "build_component_paths" : [ "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/bootloader", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/bootloader_support", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/efuse", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_app_format", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_common", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_hw_support", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_rom", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esp_system", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/esptool_py", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/freertos", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/hal", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/log", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/bootloader/subproject/main", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/bootloader/subproject/components/micro-ecc", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/newlib", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/partition_table", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/soc", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/spi_flash", "/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/xtensa", "" ],
+    "debug_prefix_map_gdbinit": ""
+}

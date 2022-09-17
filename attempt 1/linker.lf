@@ -1,0 +1,5 @@
+#AASLDKJASLKD
+[mapping:cos]
+archive: libcos.a
+entries: 
+    main (noflash)
