@@ -1,6 +1,0 @@
--- Component directory /Users/ethanbreit/Documents/operatingsystem/attempt 1 does not contain a CMakeLists.txt file. No component will be added
--- Project is not inside a git repository, or git repository has no commits; will not use 'git describe' to determine PROJECT_VER.
--- Building ESP-IDF components for target esp32
--- Found Git: /usr/bin/git (found version "2.30.1 (Apple Git-130)") 
--- Configuring incomplete, errors occurred!
-See also "/Users/ethanbreit/Documents/operatingsystem/test_app/CMakeFiles/CMakeOutput.log".

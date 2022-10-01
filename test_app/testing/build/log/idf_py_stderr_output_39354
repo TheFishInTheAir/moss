@@ -1,9 +1,0 @@
-CMake Error at /Users/ethanbreit/Documents/libraries/esp/esp-idf/tools/cmake/build.cmake:245 (message):
-  Failed to resolve component 'chaOS'.
-Call Stack (most recent call first):
-  /Users/ethanbreit/Documents/libraries/esp/esp-idf/tools/cmake/build.cmake:281 (__build_resolve_and_add_req)
-  /Users/ethanbreit/Documents/libraries/esp/esp-idf/tools/cmake/build.cmake:574 (__build_expand_requirements)
-  /Users/ethanbreit/Documents/libraries/esp/esp-idf/tools/cmake/project.cmake:440 (idf_build_process)
-  CMakeLists.txt:8 (project)
-
-

@@ -1,0 +1,14 @@
+#include <interrupt.h>
+
+#include <esp_private/esp_clk.h>
+#include <esp_private/esp_int_wdt.h>
+
+// RAW DOG THE INTERRUPTS BABYYY!
+
+void moss_interrupt_init()
+{
+    // Setup Interrupts HERE!
+    esp_int_wdt_init();
+
+    
+}

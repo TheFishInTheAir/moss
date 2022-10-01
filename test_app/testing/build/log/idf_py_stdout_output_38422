@@ -1,5 +1,0 @@
--- Project is not inside a git repository, or git repository has no commits; will not use 'git describe' to determine PROJECT_VER.
--- Building ESP-IDF components for target esp32
-Solving dependencies requirements
--- Configuring incomplete, errors occurred!
-See also "/Users/ethanbreit/Documents/operatingsystem/test_app/build/CMakeFiles/CMakeOutput.log".
