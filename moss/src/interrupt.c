@@ -4,6 +4,7 @@
 
 #include <esp_private/esp_clk.h>
 #include <esp_private/esp_int_wdt.h>
+#include <assert.h>
 
 
 #include <stdint.h>
@@ -14,10 +15,10 @@ static volatile uint32_t _this_some_crazy_shit = 0;
 
 // This is a temporary interrupt handler
 // This is the slower option, It's implemented but theres no option to enable this on FreeRTOS
-IRAM_ATTR void __moss_tick_handler(void *arg)
+/*IRAM_ATTR void __moss_tick_handler(void *arg)
 {
     _this_some_crazy_shit++;
-}
+}*/
 
 
 void _moss_interrupt_tick_timer_init()
