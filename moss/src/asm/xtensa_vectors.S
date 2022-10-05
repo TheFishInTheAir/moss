@@ -103,6 +103,7 @@
 
  */
 
+// Make sure we override interrupt endpoint macros
 #include "xtensa_rtos.h"
 #include "esp_private/panic_reason.h"
 #include "sdkconfig.h"

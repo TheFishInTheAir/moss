@@ -2,6 +2,8 @@
 #include <scheduler.h>
 #include <sdkconfig.h>
 
+#include <moss.h>
+
 #include <esp_private/esp_clk.h>
 #include <esp_private/esp_int_wdt.h>
 
@@ -52,26 +54,26 @@ void moss_portlvl_init()
 
     // Setup VFS Console
     {
-	esp_err_t vfs_err = esp_vfs_console_register();
-	assert(vfs_err == ESP_OK && "Failed to register vfs console");
-	
-	const static char *default_stdio_dev = "/dev/console/";
-	esp_reent_init(_GLOBAL_REENT);
-	_GLOBAL_REENT->_stdin  = fopen(default_stdio_dev, "r");
-	_GLOBAL_REENT->_stdout = fopen(default_stdio_dev, "w");
-	_GLOBAL_REENT->_stderr = fopen(default_stdio_dev, "w");
+        esp_err_t vfs_err = esp_vfs_console_register();
+        assert(vfs_err == ESP_OK && "Failed to register vfs console");
+        
+        const static char *default_stdio_dev = "/dev/console/";
+        esp_reent_init(_GLOBAL_REENT);
+        _GLOBAL_REENT->_stdin  = fopen(default_stdio_dev, "r");
+        _GLOBAL_REENT->_stdout = fopen(default_stdio_dev, "w");
+        _GLOBAL_REENT->_stderr = fopen(default_stdio_dev, "w");
     }
     
     // Ignoring RTC init for now.
 
     // Disable the Boot Watchdog
     {
-	wdt_hal_context_t rtc_wdt_ctx = {.inst = WDT_RWDT, .rwdt_dev = &RTCCNTL};
+        wdt_hal_context_t rtc_wdt_ctx = {.inst = WDT_RWDT, .rwdt_dev = &RTCCNTL};
 
-	
-	wdt_hal_write_protect_disable(&rtc_wdt_ctx);
-	wdt_hal_disable(&rtc_wdt_ctx);
-	wdt_hal_write_protect_enable(&rtc_wdt_ctx);
+        
+        wdt_hal_write_protect_disable(&rtc_wdt_ctx);
+        wdt_hal_disable(&rtc_wdt_ctx);
+        wdt_hal_write_protect_enable(&rtc_wdt_ctx);
     }
     
     ESP_LOGI(TAG, "Disabled Boot Watchdog");
@@ -90,14 +92,42 @@ void _moss_interrupt_init()
 
 void test_process_twoo()
 {
-    printf("Executed a second cool process\n");
+    while(1)
+    {
+        printf("Did a thing on process 1\n");
+
+
+        // Spin wait
+        for(int i = 0; i < 5000000; i++)
+        {
+            _moss_nop();
+        }
+
+        moss_process_exec_queue_push(&moss_sched()->queue, moss_active_process);
+        moss_yield();
+    }
 }
 
 void test_process_entry()
 {
-    printf("Executed a cool process\n");
-    moss_process* secondary_proc;
-    moss_instantiate_proc(moss_sched(), &secondary_proc, "testingggg", test_process_twoo); //TODO: should allow process to be null
+    printf("Succesfull process switch!!\n");
+
+    while(1)    
+    {
+        printf("Did a thing on process 2 :)\n");
+
+
+        
+        // Spin wait
+        for(int i = 0; i < 5000000; i++)
+        {
+            _moss_nop();
+        }
+
+        moss_process_exec_queue_push(&moss_sched()->queue, moss_active_process);
+        moss_yield();        
+
+    }
 }
 
 void moss_kernel_init()
@@ -116,6 +146,9 @@ void moss_kernel_init()
     // Create Main Task
     moss_process* main_proc;
     moss_instantiate_proc(moss_sched(), &main_proc, "moss_main", test_process_entry);
+
+    moss_instantiate_proc(moss_sched(), NULL, "test_process", test_process_twoo); 
+
 
     // Start Scheduler
     moss_scheduler_start(moss_sched());

@@ -18,3 +18,8 @@
 void func(void);
 
 void moss_version(char* buf, uint32_t size);
+
+void _moss_nop();
+void moss_yield();
+void moss_interrupt_yield();
+void _moss_xt_dispatch();

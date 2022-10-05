@@ -4,6 +4,7 @@
 // Two kernel level PIDs
 // Six User Level PIDs (hopefully enough)
 #define MAX_PROCS 8
+#define PROC_ID_MAX 256
 
 typedef enum 
 {
@@ -18,13 +19,21 @@ struct _moss_process;
 struct _moss_process_node;
 struct _moss_scheduler_context;
 
+
 void moss_init_tick_divisor();
 
 
 // moss Process Definition
 typedef struct _moss_process
 {
-    char* identifier;
+    // In convension with FreeRTOS top_of_stack pointer is first in process struct so it has
+    // a zero offset. I Believe this is always just the interrupt stack frame....
+    volatile uint8_t* top_of_stack;
+
+
+
+    uint8_t* stack;
+    char identifier[PROC_ID_MAX];
     uint8_t pid;
 
     
@@ -47,6 +56,8 @@ typedef struct _moss_process
     
     
 } moss_process;
+
+extern moss_process* moss_active_process;
 
 int moss_create_proc(struct _moss_scheduler_context* ctx, moss_process** proc, char* identifier, void(*entry_point)());
 
@@ -77,7 +88,6 @@ typedef struct _moss_scheduler_context
     // Execution Queue (for now)
     moss_process_exec_queue queue;
     uint8_t init_flag;
-    struct moss_process* active_proc;
 } moss_scheduler_context;
 
 moss_scheduler_context* moss_sched();
@@ -89,3 +99,11 @@ int moss_scheduler_init();
 
 int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc,
                           char* identifier, void(*entry_point)());
+
+
+
+// Work in progress sections
+//void moss_yield();
+
+void moss_prime_context_switch();
+//void moss_interrupt_yield();

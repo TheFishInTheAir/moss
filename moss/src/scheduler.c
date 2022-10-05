@@ -6,7 +6,19 @@
 //TODO: dont do this shit (directly include allocator tbh)
 #include <stdlib.h>
 
+#include <esp_log.h>
+
+#include <stdio.h>
+
+#include <xtensa/config/core.h>
+#include <xtensa/xtensa_context.h>
+
+#define STACK_DEPTH 256*4
+
+#define TAG "moss_scheduler"
+
 moss_scheduler_context sched_ctx;
+moss_process* moss_active_process;
 
 int _moss_scheduler_register_proc(moss_scheduler_context* ctx, moss_process* proc);
 int _moss_scheduler_preempt(moss_scheduler_context* ctx);
@@ -21,26 +33,87 @@ void moss_init_tick_divisor()
  ***********/
 
 // Create a new process and add add it to execution queue
-int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc,
+// Proc ref can be null
+int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
                           char* identifier, void(*entry_point)())
 {
-    PROP(moss_create_proc(ctx, proc, identifier, entry_point));
+    moss_process* proc;
+    PROP(moss_create_proc(ctx, &proc, identifier, entry_point));
 
-    PROP(moss_process_exec_queue_push(&ctx->queue, *proc));
+    PROP(moss_process_exec_queue_push(&ctx->queue, proc));
+
+    if(proc_ref != NULL)
+        *proc_ref = proc;
 
     return MOSS_SUCCESS;
 }
 
-int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc, 
+void _test_exit()
+{
+    assert(0 && "The Fuck");
+}
+
+extern void _xt_user_exit();
+
+// TODO: Cleanup
+uint8_t* _moss_init_stack(moss_process* proc)
+{
+    // Heavy Inspo from the freertos port code
+
+    uint8_t *sp, *tos;
+    tos = proc->top_of_stack;
+    sp  = (uint8_t*) (((long)tos-XT_STK_FRMSZ-XT_CP_SIZE) & ~0xf); // allignmet
+
+
+    // Zero Stack Frame
+    for(uint8_t* tp = sp; tp <= tos; tp++)
+    {
+        // This is for debugging
+        *tp = 0;
+    }
+
+    // Possible that there are some allignment issues which are leading to the 
+    // Instruction failing
+
+    XtExcFrame* frame = (XtExcFrame*) sp;
+    frame->pc = (long*) proc->entry_point;
+    frame->a0 = 0;
+    frame->a1 = tos;
+    frame->a10 = (long*) proc->entry_point; //testing purposes
+
+    // This is the final call that loads PS PC and A0 
+    frame->exit = (long*) _xt_user_exit; 
+
+    // TODO: figure out which flags to use.
+    //frame->ps = PS_UM | PS_EXCM;
+    frame->ps = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
+
+    return sp;
+}
+
+// Proc Ref cant be null
+int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc_ref, 
                                char* identifier, void(*entry_point)())
 {
-    *proc = (moss_process*) malloc(sizeof(moss_process));
-    strcpy((*proc)->identifier, identifier);
-    (*proc)->entry_point = (void*)entry_point;
-    (*proc)->instruction_ptr = NULL;
-    (*proc)->state = MOSS_PROCESS_UNSTARTED;
+    moss_process* proc;
+    proc = (moss_process*) malloc(sizeof(moss_process));
+    *proc_ref = proc;
 
-    PROP(_moss_scheduler_register_proc(ctx, *proc));
+    
+    strcpy(proc->identifier, identifier);
+    proc->entry_point = (void*)entry_point;
+    proc->instruction_ptr = NULL;
+    proc->state = MOSS_PROCESS_UNSTARTED;
+
+    proc->stack = (uint8_t*) malloc(STACK_DEPTH); // So arbitrary its incredible TODO: replace
+
+    proc->top_of_stack = proc->stack+(STACK_DEPTH-1);
+
+    // Initialise stack frame.
+    proc->top_of_stack = _moss_init_stack(proc);
+
+    PROP(_moss_scheduler_register_proc(ctx, proc));
+
 
     return MOSS_SUCCESS;
 }
@@ -59,7 +132,6 @@ moss_scheduler_context* moss_sched()
 // NOTE: Not sure how we want to handle global things.
 int moss_scheduler_init()
 {
-    sched_ctx.active_proc = NULL;
     sched_ctx.num_procs = 0;
     sched_ctx.init_flag = MOSS_INIT_CONST;
     PROP(moss_process_exec_queue_init(&sched_ctx.queue));
@@ -123,7 +195,20 @@ int moss_scheduler_start_proc(moss_scheduler_context* ctx, moss_process* proc)
 int moss_scheduler_start(moss_scheduler_context* ctx)
 {
     // very stupid lil thing here.
-    // This should probably be a process of its own to beee honest
+    
+
+    // This is very much not how schedulers work.
+
+    ESP_LOGI(TAG, "Beginning Scheduler");
+
+    //moss_prime_context_switch();
+    //_moss_xt_dispatch();
+    __asm__ volatile ("call0    _moss_xt_dispatch\n");
+
+    //moss_yield();
+    //moss_interrupt_yield();
+
+    /*
     while(1)
     {
         moss_process* next_proc;
@@ -135,7 +220,9 @@ int moss_scheduler_start(moss_scheduler_context* ctx)
                 next_proc->state = MOSS_PROCESS_STOPPED;
             }
         }
-    }
+    }*/
+
+    return MOSS_SUCCESS;
 }
 
 
@@ -184,4 +271,26 @@ int moss_process_exec_queue_push(moss_process_exec_queue* queue, moss_process* p
     queue->num_elems++;
 
     return MOSS_SUCCESS;
+}
+
+
+
+void moss_prime_context_switch()
+{
+    // Likely the previous process state should be determined somewhere else
+    //moss_active_process->state = MOSS_PROCESS_WAITING;
+
+    moss_process* next_proc;
+    if(moss_process_exec_queue_pop(&moss_sched()->queue, &next_proc))
+    {
+        printf("Next Task: %s\n", next_proc->identifier);
+        next_proc->state = MOSS_PROCESS_RUNNING;
+        moss_active_process = next_proc;
+    }
+    else
+    {
+        //while(1){_moss_nop();}
+        ESP_LOGI(TAG, "No More Processes");
+        assert(0 && "Process Queue is empty??");
+    }
 }

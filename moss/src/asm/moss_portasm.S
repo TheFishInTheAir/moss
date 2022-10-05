@@ -164,10 +164,10 @@ _moss_xt_int_enter:
 *
 *******************************************************************************
 */
-    .globl  _frxt_int_exit
-    .type   _frxt_int_exit,@function
+    .globl  _moss_xt_int_exit
+    .type   _moss_xt_int_exit,@function
     .align  4
-_frxt_int_exit:
+_moss_xt_int_exit:
 
     getcoreid a4
     movi    a2,  port_xSchedulerRunning
@@ -191,7 +191,7 @@ _frxt_int_exit:
     #endif
     #endif
 
-    movi    a2,  pxCurrentTCB
+    movi    a2,  moss_active_process
     addx4   a2,  a4, a2
     l32i    a2,  a2, 0                  /* a2 = current TCB                */
     beqz    a2,  1f                     /* no task ? go to dispatcher      */
@@ -214,11 +214,12 @@ _frxt_int_exit:
     s32i    a15, a1, XT_STK_A15
     #endif
 
+    //TODO: replace this yield!
     #ifdef __XTENSA_CALL0_ABI__
-    call0   vPortYieldFromInt       /* call dispatch inside the function; never returns */
+    call0   moss_interrupt_yield       /* call dispatch inside the function; never returns */
     #else
-    call4   vPortYieldFromInt       /* this one returns */
-    call0   _frxt_dispatch          /* tail-call dispatcher */
+    call4   moss_interrupt_yield       /* this one returns */
+    call0   _moss_xt_dispatch          /* tail-call dispatcher */
     /* Never returns here. */
     #endif
 
@@ -261,10 +262,10 @@ _frxt_int_exit:
 **********************************************************************************************************
 */
 #ifdef CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
-    .globl  _frxt_timer_int
-    .type   _frxt_timer_int,@function
+    .globl  _moss_xt_timer_int
+    .type   _moss_xt_timer_int,@function
     .align  4
-_frxt_timer_int:
+_moss_xt_timer_int:
 
     /*
     Xtensa timers work by comparing a cycle counter with a preset value.  Once the match occurs
@@ -312,6 +313,8 @@ _frxt_timer_int:
     s32i    a3, sp, 8
     #endif
 
+    //TODO: this is what to change
+
     /* Call the FreeRTOS tick handler (see port_systick.c). */
     #ifdef __XTENSA_CALL0_ABI__
     call0   xPortSysTickHandler
@@ -351,10 +354,10 @@ _frxt_timer_int:
 **********************************************************************************************************
 */
 #ifdef CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
-    .globl  _frxt_tick_timer_init
-    .type   _frxt_tick_timer_init,@function
+    .globl  _moss_xt_tick_timer_init
+    .type   _moss_xt_tick_timer_init,@function
     .align  4
-_frxt_tick_timer_init:
+_moss_xt_tick_timer_init:
 
     ENTRY(16)
 
@@ -412,21 +415,23 @@ _frxt_tick_timer_init:
 *
 **********************************************************************************************************
 */
-    .globl  _frxt_dispatch
-    .type   _frxt_dispatch,@function
+
+// TODO: This is what you will probably be working on today...
+    .globl  _moss_xt_dispatch
+    .type   _moss_xt_dispatch,@function
     .align  4
-_frxt_dispatch:
+_moss_xt_dispatch:
 
     #ifdef __XTENSA_CALL0_ABI__
-    call0   vTaskSwitchContext  // Get next TCB to resume
-    movi    a2, pxCurrentTCB
+    call0   moss_prime_context_switch  // Get next TCB to resume
+    movi    a2, moss_active_process
     getcoreid a3
     addx4   a2,  a3, a2
     #else
-    call4   vTaskSwitchContext  // Get next TCB to resume
-    movi    a2, pxCurrentTCB
+    call4   moss_prime_context_switch  // Get next TCB to resume
+    movi    a2, moss_active_process
     getcoreid a3
-    addx4   a2,  a3, a2
+    addx4   a2,  a3, a2 // This is essentially just indexing which process is runnign on the core.
     #endif
     l32i    a3,  a2, 0
     l32i    sp,  a3, TOPOFSTACK_OFFS     /* SP = next_TCB->pxTopOfStack;  */
@@ -434,9 +439,9 @@ _frxt_dispatch:
 
     /* Determine the type of stack frame. */
     l32i    a2,  sp, XT_STK_EXIT        /* exit dispatcher or solicited flag */
-    bnez    a2,  .L_frxt_dispatch_stk
+    bnez    a2,  .L_moss_xt_dispatch_stk
 
-.L_frxt_dispatch_sol:
+.L_moss_xt_dispatch_sol:
 
     /* Solicited stack frame. Restore minimal context and return from vPortYield(). */
     #if XCHAL_HAVE_THREADPTR
@@ -464,11 +469,13 @@ _frxt_dispatch:
     retw
     #endif
 
-.L_frxt_dispatch_stk:
+.L_moss_xt_dispatch_stk:
 
-    #if XCHAL_CP_NUM > 0
+// Skipping coprocessor stuff for now
+
+    #if XCHAL_CP_NUM > 0 && 0
     /* Restore CPENABLE from task's co-processor save area. */
-    movi    a3, pxCurrentTCB            /* cp_state =                       */
+    movi    a3, moss_active_process            /* cp_state =                       */
     getcoreid a2
     addx4   a3,  a2, a3
     l32i    a3, a3, 0
@@ -477,6 +484,7 @@ _frxt_dispatch:
     wsr     a3, CPENABLE
     #endif
 
+    // NOTE: Reusing the pre-packaged context store/restore functions
     /* Interrupt stack frame. Restore full context and return to exit dispatcher. */
     call0   _xt_context_restore
 
@@ -516,10 +524,20 @@ _frxt_dispatch:
 *
 **********************************************************************************************************
 */
-    .globl  vPortYield
-    .type   vPortYield,@function
+    .global _moss_nop
+    .type   _moss_nop,@function
+    .align 4
+_moss_nop:
+    ENTRY(16)
+    NOP
+    RET(16)
+
+    .global  moss_yield
+    .type   moss_yield,@function
     .align  4
-vPortYield:
+moss_yield:
+
+// For the most part this seems to be kind of a duplicate of the main context_store stuff.
 
     #ifdef __XTENSA_CALL0_ABI__
     addi    sp,  sp, -XT_SOL_FRMSZ
@@ -555,13 +573,13 @@ vPortYield:
 
     rsil    a2,  XCHAL_EXCM_LEVEL       /* disable low/med interrupts       */
 
-    #if XCHAL_CP_NUM > 0
+    #if XCHAL_CP_NUM > 0 && 0
     /* Save coprocessor callee-saved state (if any). At this point CPENABLE */
     /* should still reflect which CPs were in use (enabled).                */
     call0   _xt_coproc_savecs
     #endif
 
-    movi    a2,  pxCurrentTCB
+    movi    a2,  moss_active_process
     getcoreid a3
     addx4   a2,  a3, a2
     l32i    a2,  a2, 0                  /* a2 = pxCurrentTCB                */
@@ -580,7 +598,7 @@ vPortYield:
     #endif
 
     /* Tail-call dispatcher. */
-    call0   _frxt_dispatch
+    call0   _moss_xt_dispatch
     /* Never reaches here. */
 
 
@@ -603,16 +621,16 @@ vPortYield:
 *
 **********************************************************************************************************
 */
-    .globl  vPortYieldFromInt
-    .type   vPortYieldFromInt,@function
-    .align  4
-vPortYieldFromInt:
+    .global  moss_interrupt_yield
+    .type    moss_interrupt_yield,@function
+    .align   4
+moss_interrupt_yield:
 
     ENTRY(16)
 
-    #if XCHAL_CP_NUM > 0
+    #if XCHAL_CP_NUM > 0 && 0
     /* Save CPENABLE in task's co-processor save area, and clear CPENABLE.  */
-    movi    a3, pxCurrentTCB            /* cp_state =                       */
+    movi    a3, moss_active_process            /* cp_state =                       */
     getcoreid a2
     addx4   a3,  a2, a3
     l32i    a3, a3, 0
@@ -627,7 +645,7 @@ vPortYieldFromInt:
 
     #ifdef __XTENSA_CALL0_ABI__
     /* Tail-call dispatcher. */
-    call0   _frxt_dispatch
+    call0   _moss_xt_dispatch
     /* Never reaches here. */
     #else
     RET(16)
