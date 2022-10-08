@@ -423,12 +423,12 @@ _moss_xt_tick_timer_init:
 _moss_xt_dispatch:
 
     #ifdef __XTENSA_CALL0_ABI__
-    call0   moss_prime_context_switch  // Get next TCB to resume
+    call0   _moss_prime_context_switch  // Get next TCB to resume
     movi    a2, moss_active_process
     getcoreid a3
     addx4   a2,  a3, a2
     #else
-    call4   moss_prime_context_switch  // Get next TCB to resume
+    call4   _moss_prime_context_switch  // Get next TCB to resume
     movi    a2, moss_active_process
     getcoreid a3
     addx4   a2,  a3, a2 // This is essentially just indexing which process is runnign on the core.
@@ -541,8 +541,16 @@ moss_yield:
 
     #ifdef __XTENSA_CALL0_ABI__
     addi    sp,  sp, -XT_SOL_FRMSZ
+
+    call0   _moss_push_active_process;  // push current process into execution queue
     #else
     entry   sp,  XT_SOL_FRMSZ
+
+    call4   _moss_push_active_process  // push current process into execution queue
+    #endif
+
+    #ifdef __XTENSA_CALL0_ABI__
+    #else
     #endif
 
     rsr     a2,  PS

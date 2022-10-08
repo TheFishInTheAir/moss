@@ -4,8 +4,9 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceRoot}/moss/include/**",
-                "${workspaceRoot}/../esp-idf/components/**"
-            ],
+                "~/Documents/libraries/esp/esp-idf/components/**"
+                
+            ],  
             "defines": [],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"

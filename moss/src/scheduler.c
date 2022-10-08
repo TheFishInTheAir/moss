@@ -273,17 +273,21 @@ int moss_process_exec_queue_push(moss_process_exec_queue* queue, moss_process* p
     return MOSS_SUCCESS;
 }
 
+// @Refactor Name
+void _moss_push_active_process()
+{
+    moss_active_process->state = MOSS_PROCESS_WAITING;
+    moss_process_exec_queue_push(&moss_sched()->queue, moss_active_process);
+}
 
-
-void moss_prime_context_switch()
+// @Refactor Name
+void _moss_prime_context_switch()
 {
     // Likely the previous process state should be determined somewhere else
-    //moss_active_process->state = MOSS_PROCESS_WAITING;
-
     moss_process* next_proc;
     if(moss_process_exec_queue_pop(&moss_sched()->queue, &next_proc))
     {
-        printf("Next Task: %s\n", next_proc->identifier);
+        //printf("Next Task: %s\n", next_proc->identifier);
         next_proc->state = MOSS_PROCESS_RUNNING;
         moss_active_process = next_proc;
     }

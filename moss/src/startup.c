@@ -89,47 +89,7 @@ void _moss_interrupt_init()
     
 }
 
-
-void test_process_twoo()
-{
-    while(1)
-    {
-        printf("Did a thing on process 1\n");
-
-
-        // Spin wait
-        for(int i = 0; i < 5000000; i++)
-        {
-            _moss_nop();
-        }
-
-        moss_process_exec_queue_push(&moss_sched()->queue, moss_active_process);
-        moss_yield();
-    }
-}
-
-void test_process_entry()
-{
-    printf("Succesfull process switch!!\n");
-
-    while(1)    
-    {
-        printf("Did a thing on process 2 :)\n");
-
-
-        
-        // Spin wait
-        for(int i = 0; i < 5000000; i++)
-        {
-            _moss_nop();
-        }
-
-        moss_process_exec_queue_push(&moss_sched()->queue, moss_active_process);
-        moss_yield();        
-
-    }
-}
-
+extern void app_main();
 void moss_kernel_init()
 {
     ESP_LOGI(TAG, "Made it to kernel Init");
@@ -139,16 +99,12 @@ void moss_kernel_init()
 
     
     // And interrupt watchdog
-
     // Init internal components
     moss_scheduler_init();
 
     // Create Main Task
     moss_process* main_proc;
-    moss_instantiate_proc(moss_sched(), &main_proc, "moss_main", test_process_entry);
-
-    moss_instantiate_proc(moss_sched(), NULL, "test_process", test_process_twoo); 
-
+    moss_instantiate_proc(moss_sched(), &main_proc, "moss_main", app_main);
 
     // Start Scheduler
     moss_scheduler_start(moss_sched());
