@@ -1,8 +1,7 @@
 #include <stdio.h>
-#include <moss.h>
-#include <scheduler.h>
 #include <esp_timer.h>
-
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #define PROFILING_PROCESS_LOOP_N (100)
 int testing_thing = 0;
@@ -10,15 +9,15 @@ volatile int complete = 0;
 
 void profiling_process()
 {
-    int process_id = moss_active_process->pid;
+    int process_id = 1;
     for(int i = 0; i < PROFILING_PROCESS_LOOP_N; i++)
     {
-        testing_thing = i%(10);
-        moss_yield();
+        testing_thing = i % 10;
+        taskYIELD();
     }
     complete++;
 
-    while(1){moss_yield();}
+    while(1){taskYIELD();}
 }
 
 #define NUM_PROCS 6
@@ -32,7 +31,7 @@ void context_switching_test()
     {
         for(int j = 0; j < PROFILING_PROCESS_LOOP_N; j++)
         {
-            testing_thing = j%(10);
+            testing_thing = j % 10;
         }
     }
 
@@ -40,18 +39,17 @@ void context_switching_test()
     printf("End Time: %lld\n", fend);
     printf("Diff Time: %lld\n", fend-fstart);
 
-
-
     int64_t pstart = esp_timer_get_time();
     printf("Start Time: %lld\n", pstart);
 
+    TaskHandle_t _handle;
     for(int i = 0; i < NUM_PROCS; i++)
     {
-        moss_instantiate_proc(moss_sched(), NULL, "profiling_proc", profiling_process);
+        xTaskCreatePinnedToCore(profiling_process, "profiling_proc", 126*4, NULL, 1, &_handle, 0);
     }
 
     while(complete<NUM_PROCS)
-        moss_yield();
+        taskYIELD();
 
     int64_t pend = esp_timer_get_time();
 
@@ -63,22 +61,12 @@ void context_switching_test()
 
     printf("Context Switches: %d\n", (NUM_PROCS+1)*PROFILING_PROCESS_LOOP_N);
     printf("Switch Overhead Avg: %f\n", (double)overhead/(double)((NUM_PROCS+1)*PROFILING_PROCESS_LOOP_N));
-
 }
 
 
 
 void app_main(void)
 {
-    printf("Hello world!\n");
-
-    printf("Impressive we finally got here tbh\n");
-
-
-    char version_buf[256];
-    moss_version(version_buf, 256);
-    printf("Kernel Version: %s\n", version_buf);
-
     context_switching_test();
 
     while(1);

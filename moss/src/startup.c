@@ -6,6 +6,8 @@
 
 #include <esp_private/esp_clk.h>
 #include <esp_private/esp_int_wdt.h>
+#include <esp_private/startup_internal.h>
+
 
 #include <esp_timer.h>
 #include <esp_attr.h>
@@ -24,7 +26,9 @@
 
 static const char* TAG = "moss_startup";
 
-// Override start_cpu0_default
+static volatile bool _sys_init_complete = 0;
+
+// Overrides start_cpu0_default
 void moss_portlvl_init()
 {
     ESP_EARLY_LOGI(TAG, "Overriding Default Startup");
@@ -38,9 +42,6 @@ void moss_portlvl_init()
     esp_app_get_elf_sha256(buf, sizeof(buf));
     ESP_EARLY_LOGI(TAG, "ELF file SHA256:  %s...", buf);
     //    ESP_EARLY_LOGI(TAG, "ESP-IDF:          %s", app_desc->idf_ver);
-
-
-    // TODO: add second core init before following init steps.
 
     // Heap Allocator
     heap_caps_init();
@@ -76,23 +77,53 @@ void moss_portlvl_init()
         wdt_hal_write_protect_enable(&rtc_wdt_ctx);
     }
     
-    ESP_LOGI(TAG, "Disabled Boot Watchdog");
+    ESP_EARLY_LOGI(TAG, "Disabled Boot Watchdog");
+
+    ESP_EARLY_LOGI(TAG, "Unblocking Other Cores");
+    startup_resume_other_cores();
+
 
     moss_kernel_init();
 }
 
+void moss_cpu1_init()
+{
+    // Wait for system init to finish  
+    while(!_sys_init_complete)
+    {
+        for(int i = 0; i < (10^4); i++)
+        {
+            //TODO: make nop a macro instaed of a call to reduce the stack manipulation overhead
+            _moss_nop();
+        }
+    }
+    moss_scheduler_start(moss_sched());
+
+}
+
 void _moss_interrupt_init()
 {
-    // Setup Interrupts HERE!
+    //TODO: Setup Interrupts HERE!
     esp_int_wdt_init();
 
-    
 }
+
+// Temporary idle task for now
+void idle_task()
+{
+    int i = 0;
+    while(1)
+    {
+        moss_yield();
+        i++;
+    }
+}
+
 
 extern void app_main();
 void moss_kernel_init()
 {
-    ESP_LOGI(TAG, "Made it to kernel Init");
+    ESP_EARLY_LOGI(TAG, "Made it to kernel Init");
 
     // TODO: deal with the interrupt nightmare later
     //_moss_interrupt_init();
@@ -104,7 +135,13 @@ void moss_kernel_init()
 
     // Create Main Task
     moss_process* main_proc;
-    moss_instantiate_proc(moss_sched(), &main_proc, "moss_main", app_main);
+    moss_instantiate_proc(moss_sched(), &main_proc, "moss_main", app_main, NULL);
+
+
+    //moss_process_exec_queue_debug_dump(&moss_sched()->queue);
+
+    // Scheduler Init State has been setup, can now let other core resume operation.
+    _sys_init_complete = 1;
 
     // Start Scheduler
     moss_scheduler_start(moss_sched());

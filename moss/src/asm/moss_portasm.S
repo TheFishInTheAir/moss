@@ -25,10 +25,15 @@
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
  * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
-// THIS IS A MODIFIED VERSION OF THE FREERTOS PORT ASM
+
+/****************************************************************************
+    This has been modified and restructured
+    - Ethan Breit
+*****************************************************************************/
+
+// TODO: UPDATE Documentation within file
 
 
 
@@ -118,7 +123,7 @@ _moss_xt_int_enter:
     s32i    a2,  a3, 0                  /* save nesting count              */
     bnei    a2,  1, .Lnested            /* !=0 before incr, so nested      */
 
-    movi    a2,  pxCurrentTCB //TODO: replace with our own Process State Object
+    movi    a2,  moss_active_process //TODO: replace with our own Process State Object
     addx4   a2,  a4, a2
     l32i    a2,  a2, 0                  /* a2 = current TCB                */
     beqz    a2,  1f
@@ -429,10 +434,16 @@ _moss_xt_dispatch:
     addx4   a2,  a3, a2
     #else
     call4   _moss_prime_context_switch  // Get next TCB to resume
+
     movi    a2, moss_active_process
     getcoreid a3
     addx4   a2,  a3, a2 // This is essentially just indexing which process is runnign on the core.
     #endif
+
+    // TODO: DISABLE INTERRUPTS AGAIN
+    // Priming the Process Switch re-enables interrupts because it uses a spinlock
+
+
     l32i    a3,  a2, 0
     l32i    sp,  a3, TOPOFSTACK_OFFS     /* SP = next_TCB->pxTopOfStack;  */
     s32i    a3,  a2, 0
@@ -460,6 +471,11 @@ _moss_xt_dispatch:
     /* Ensure wsr.CPENABLE is complete (should be, it was cleared on entry). */
     rsync
     #endif
+    //Can print numbers here:
+
+    l32i    a6,  sp, XT_SOL_PC
+
+
     /* As soons as PS is restored, interrupts can happen. No need to sync PS. */
     wsr     a3,  PS
     #ifdef __XTENSA_CALL0_ABI__
@@ -509,6 +525,31 @@ _moss_xt_dispatch:
 
 
 /*
+    These are a couple of helper functions
+ */
+
+//NOTE: these stack sizes are unecessarily large
+
+    .global _moss_nop
+    .type   _moss_nop,@function
+    .align 4
+_moss_nop:
+    ENTRY(16)
+    NOP
+    RET(16)
+
+
+    .global moss_core_id
+    .type   moss_core_id,@function
+    .align 4
+moss_core_id:
+    ENTRY(16)
+    
+    getcoreid a2
+
+    RET(16)
+
+/*
 **********************************************************************************************************
 *                            PERFORM A SOLICTED CONTEXT SWITCH (from a task)
 *                                        void vPortYield(void)
@@ -524,39 +565,26 @@ _moss_xt_dispatch:
 *
 **********************************************************************************************************
 */
-    .global _moss_nop
-    .type   _moss_nop,@function
-    .align 4
-_moss_nop:
-    ENTRY(16)
-    NOP
-    RET(16)
 
-    .global  moss_yield
-    .type   moss_yield,@function
+
+
+    .global  moss_ctx_switch
+    .type   moss_ctx_switch,@function
     .align  4
-moss_yield:
+moss_ctx_switch:
 
-// For the most part this seems to be kind of a duplicate of the main context_store stuff.
-
+    // For the most part this seems to be a lightweight version of the main context_store stuff.
+    
     #ifdef __XTENSA_CALL0_ABI__
     addi    sp,  sp, -XT_SOL_FRMSZ
-
-    call0   _moss_push_active_process;  // push current process into execution queue
     #else
     entry   sp,  XT_SOL_FRMSZ
-
-    call4   _moss_push_active_process  // push current process into execution queue
-    #endif
-
-    #ifdef __XTENSA_CALL0_ABI__
-    #else
     #endif
 
     rsr     a2,  PS
     s32i    a0,  sp, XT_SOL_PC
     s32i    a2,  sp, XT_SOL_PS
-    #if XCHAL_HAVE_THREADPTR
+    #if XCHAL_HAVE_THREADPTR && 0
     rur.threadptr a2
     s32i    a2,  sp, XT_SOL_THREADPTR
     #endif
@@ -595,7 +623,13 @@ moss_yield:
     s32i    a3,  sp, XT_SOL_EXIT        /* 0 to flag as solicited frame     */
     s32i    sp,  a2, TOPOFSTACK_OFFS    /* pxCurrentTCB->pxTopOfStack = SP  */
 
-    #if XCHAL_CP_NUM > 0
+    // Add a primed flag (meaning it is in a state ready to be launched into)
+    // Note: this is a consequence of queuing the task before saving the context 
+    // this has since been fixed but im still not completely happy with the solution.
+    // TODO: go back to just a s32i, avoid as much stack manipulation as possible.
+    call4   _moss_prime_proc
+
+    #if XCHAL_CP_NUM > 0 && 0
     /* Clear CPENABLE, also in task's co-processor state save area. */
     l32i    a2,  a2, CP_TOPOFSTACK_OFFS /* a2 = pxCurrentTCB->cp_state      */
     movi    a3,  0
@@ -608,7 +642,6 @@ moss_yield:
     /* Tail-call dispatcher. */
     call0   _moss_xt_dispatch
     /* Never reaches here. */
-
 
 /*
 **********************************************************************************************************
@@ -629,6 +662,7 @@ moss_yield:
 *
 **********************************************************************************************************
 */
+// NOTE: Currently unused as no preemption
     .global  moss_interrupt_yield
     .type    moss_interrupt_yield,@function
     .align   4

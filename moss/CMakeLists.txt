@@ -1,5 +1,5 @@
 # Add a file glob for this.
-idf_component_register(SRCS "src/moss.c" "src/startup.c" "src/interrupt.c" "src/scheduler.c" "src/asm/xtensa_vectors.S" "src/asm/moss_portasm.S"
+idf_component_register(SRCS "src/moss.c" "src/startup.c" "src/interrupt.c" "src/scheduler.c" "src/asm/xtensa_vectors.S" "src/asm/moss_portasm.S" "src/synch.c"
 			    REQUIRES esp_timer esp_hw_support heap esp_app_format vfs hal soc xtensa
 			    INCLUDE_DIRS "include")	
 

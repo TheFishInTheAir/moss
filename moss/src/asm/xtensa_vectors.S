@@ -28,10 +28,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/*
+/****************************************************************************
     This has been slightly modified to work with the overriden Vector Symbols
     - Ethan Breit
-*/
+*****************************************************************************/
 
 /*
         XTENSA VECTORS AND LOW LEVEL HANDLERS FOR AN RTOS
@@ -114,7 +114,7 @@
   Please change this when the tcb structure is changed
 */
 #define TASKTCB_XCOREID_OFFSET (0x38+configMAX_TASK_NAME_LEN+3)&~3
-.extern pxCurrentTCB
+.extern moss_active_process
 
 /*
 --------------------------------------------------------------------------------
@@ -442,7 +442,7 @@ _xt_intexc_hooks:
 Debug Exception.
 --------------------------------------------------------------------------------
 */
-
+//@IMPORTANT
 #if XCHAL_HAVE_DEBUG
 
     .begin      literal_prefix .MOSSDebugExceptionVector
@@ -933,7 +933,7 @@ _xt_coproc_exc:
     /* FPU operations are incompatible with non-pinned tasks. If we have a FPU operation
        here, to keep the entire thing from crashing, it's better to pin the task to whatever
        core we're running on now. */
-    movi    a2, pxCurrentTCB
+    movi    a2, moss_active_process
     getcoreid a3
     addx4     a2,  a3, a2
     l32i    a2, a2, 0                       /* a2 = start of pxCurrentTCB[cpuid] */
