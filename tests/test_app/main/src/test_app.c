@@ -15,9 +15,10 @@ void app_main(void)
     char version_buf[256];
     moss_version(version_buf, 256);
     _moss_log("Kernel Version: %s\n", version_buf);
-
+    
+    matrix_test_run_suite();
     context_switching_test();
-    //matrix_test_run_suite();
+    
 
     while(1);
 }

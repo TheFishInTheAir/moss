@@ -11,6 +11,7 @@
         "bitset": "c",
         "esp_timer.h": "c",
         "thread": "c"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/moss"
 
 }

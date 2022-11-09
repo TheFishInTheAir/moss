@@ -49,7 +49,7 @@ typedef struct _moss_process
 
 extern volatile moss_process* moss_active_process[NUM_CORES];
 
-int moss_create_proc(struct _moss_scheduler_context* ctx, moss_process** proc, char* identifier, void(*entry_point)(), void* user_ptr);
+int moss_create_proc(volatile struct _moss_scheduler_context* ctx, moss_process** proc, char* identifier, void(*entry_point)(), void* user_ptr);
 
 
 // Implement around a ring buf (maybe switch this up later... or just make it a list
@@ -76,25 +76,27 @@ typedef struct _moss_scheduler_context
     // Global Process List (non-hierarchical)
     struct _moss_process* procs[MAX_PROCS];
     uint32_t num_procs;
+    spinlock_t global_sched_lock;
+
 
     // Execution Queue (for now)
     moss_process_exec_queue queue;
     uint8_t init_flag;
 } moss_scheduler_context;
 
-moss_scheduler_context* moss_sched();
-moss_process* moss_scheduler_find_proc_id(moss_scheduler_context* ctx, char* id);
-moss_process* moss_scheduler_find_proc_pid(moss_scheduler_context* ctx, uint8_t pid);
-int moss_scheduler_start_proc(moss_scheduler_context* ctx, moss_process* proc);
-void moss_process_exec_queue_debug_dump(moss_process_exec_queue* queue);
-int moss_scheduler_start(moss_scheduler_context* ctx);
+volatile moss_scheduler_context* moss_sched();
+moss_process* moss_scheduler_find_proc_id(volatile moss_scheduler_context* ctx, char* id);
+moss_process* moss_scheduler_find_proc_pid(volatile moss_scheduler_context* ctx, uint8_t pid);
+int moss_scheduler_start_proc(volatile moss_scheduler_context* ctx, moss_process* proc);
+void moss_process_exec_queue_debug_dump(volatile moss_process_exec_queue* queue);
+int moss_scheduler_start(volatile moss_scheduler_context* ctx);
 int moss_scheduler_init();
 
 // General Functions
-int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc,
+int moss_instantiate_proc(volatile moss_scheduler_context* ctx, moss_process** proc,
                           char* identifier, void(*entry_point)(), void* user_ptr);
 
-int moss_delete_process(moss_scheduler_context* ctx, moss_process* proc);
+int moss_delete_process(volatile moss_scheduler_context* ctx, moss_process* proc);
 void moss_terminate();
 
 

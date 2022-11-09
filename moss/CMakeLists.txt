@@ -14,3 +14,5 @@ endif()
 file(COPY_FILE 
 	linkerscript_override/sections.ld.in
 	${esp-idf_SOURCE_DIR}/components/esp_system/ld/esp32/sections.ld.in )
+
+target_compile_options(${COMPONENT_LIB} PRIVATE "-fsanitize=undefined" "-fno-sanitize=shift-base")

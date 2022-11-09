@@ -29,10 +29,11 @@ static inline int* indx_matrix(int* mat, int col, int row)
 void matrix_test_init(int size)
 {
     matrix_size = size;
+
     mat_a = (int*) malloc(sizeof(int) * size * size);
     mat_b = (int*) malloc(sizeof(int) * size * size);
     mat_c = (int*) malloc(sizeof(int) * size * size);
-
+    
     assert(mat_a!=NULL);
     assert(mat_b!=NULL);
     assert(mat_c!=NULL);
@@ -43,6 +44,7 @@ void matrix_test_init(int size)
             *indx_matrix(mat_b, i, j) = rand() % 10;
         }
     }
+
 }
 
 void matrix_test_cleanup()
@@ -98,6 +100,7 @@ void matrix_test_multi_threaded()
     moss_semaphore_init(&completion, 0);
     moss_semaphore_init(&lock, 1);
 
+    _moss_log("Got past semaphroes\n");
 
     for(int i = 0; i < MAT_THREADS; i++)
     {
@@ -110,6 +113,7 @@ void matrix_test_multi_threaded()
         char id[] = "matrix_task0";
         id[11] = i+'0';
 
+        _moss_log("Creating new Process %s\n", id);
         moss_instantiate_proc(moss_sched(), NULL, id, _matrix_test_multiply, descriptors[i]);
     }
 
@@ -159,6 +163,9 @@ void matrix_test_run_test(int size)
     matrix_test_single_threaded();
     int64_t send    = esp_timer_get_time();
 
+    _moss_log("Doing multithreaded test now\n");
+
+
     int64_t mstart  = esp_timer_get_time();
     matrix_test_multi_threaded();
     int64_t mend    = esp_timer_get_time();
@@ -178,8 +185,21 @@ void matrix_test_run_test(int size)
 void matrix_test_run_suite()
 {
     _moss_log("---Running Matrix Multiplication Test Suite---\n");
-    //matrix_test_run_test(16);
-    //matrix_test_run_test(32);
+    matrix_test_run_test(16);
+    matrix_test_run_test(32);
+
+
+    matrix_test_run_test(16);
+    matrix_test_run_test(32);
+    matrix_test_run_test(16);
+    matrix_test_run_test(32);
+    matrix_test_run_test(16);
+    matrix_test_run_test(32);
+    matrix_test_run_test(16);
+    matrix_test_run_test(32);
+
+
+
     matrix_test_run_test(100);
-    //matrix_test_run_test(69);
+    matrix_test_run_test(69);
 }

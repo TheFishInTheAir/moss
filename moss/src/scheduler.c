@@ -12,6 +12,9 @@
 #include <xtensa/config/core.h>
 #include <xtensa/xtensa_context.h>
 
+#include "esp_heap_caps.h"
+
+
 #define STACK_DEPTH 1024*10
 
 #define TAG "moss_scheduler"
@@ -37,8 +40,9 @@ int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
     moss_process* proc;
     PROP(moss_create_proc(ctx, &proc, identifier, entry_point, user_ptr));
 
-    PROP(moss_process_exec_queue_push(&ctx->queue, proc));
+    _moss_log("Boop\n");
 
+    PROP(moss_process_exec_queue_push(&ctx->queue, proc));
 
     if(proc_ref != NULL)
         *proc_ref = proc;
@@ -97,7 +101,10 @@ int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
     if(proc_ref!=NULL)
         *proc_ref = proc;
 
-    
+    _moss_log("Making your mum\n");
+    heap_caps_check_integrity_all(1);
+    _moss_log("made your mum\n");
+
     strcpy(proc->identifier, identifier);
     proc->entry_point = (void*)entry_point;
     proc->instruction_ptr = NULL;
@@ -109,9 +116,13 @@ int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
 
     proc->top_of_stack = proc->stack+(STACK_DEPTH-1);
 
+
+    _moss_log("Making your mum 2 \n");
     // Initialise stack frame.
     proc->top_of_stack = _moss_init_stack(proc);
     proc->primed = 1;
+
+    _moss_log("Making your mum --- \n");
 
     PROP(_moss_scheduler_register_proc(ctx, proc));
 
@@ -121,13 +132,19 @@ int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
 
 int moss_delete_process(moss_scheduler_context* ctx, moss_process* proc)
 {
-    
+    spinlock_acquire(&ctx->global_sched_lock, SPINLOCK_WAIT_FOREVER);
+
+    assert(proc->state==MOSS_PROCESS_STOPPED);
     if(proc->state!=MOSS_PROCESS_STOPPED)
         return MOSS_FAIL;
 
-    free(proc->stack);
-    
+
+
+    _moss_log("Freed Stack\n");
+
     char found = 0;
+
+    // problematic
     for(int i = 0; i < ctx->num_procs; i++)
     {
         if(found)
@@ -140,7 +157,14 @@ int moss_delete_process(moss_scheduler_context* ctx, moss_process* proc)
     }
 
     ctx->num_procs--;
+
+    // Leading to heap corruption
     
+    free(proc->stack);
+    free(proc);
+
+    spinlock_release(&ctx->global_sched_lock);
+
     return MOSS_SUCCESS;
 }
 
@@ -151,7 +175,8 @@ void moss_terminate()
     moss_current_process()->state = MOSS_PROCESS_STOPPED;
 
     //moss_delete_process(moss_sched(), moss_current_process());
-    moss_yield_without_queue();
+    //moss_yield_without_queue();
+    _moss_dispatch();
     //_moss_dispatch();
 }
 
@@ -161,7 +186,7 @@ void moss_terminate()
  *************/
 
 
-moss_scheduler_context* moss_sched()
+volatile moss_scheduler_context* moss_sched()
 {
     assert(sched_ctx.init_flag==MOSS_INIT_CONST);
     return &sched_ctx;
@@ -172,6 +197,7 @@ int moss_scheduler_init()
 {
     sched_ctx.num_procs = 0;
     sched_ctx.init_flag = MOSS_INIT_CONST;
+    spinlock_initialize(&sched_ctx.global_sched_lock);
     PROP(moss_process_exec_queue_init(&sched_ctx.queue));
     
     return MOSS_SUCCESS;
@@ -186,17 +212,25 @@ int _moss_scheduler_register_proc(moss_scheduler_context* ctx, moss_process* pro
         assert(0 && "Reached Max Processes.");
         return MOSS_FAIL;
     }
+
+    _moss_log("Freeing Old procs\n");
     for(int i = 0; i < ctx->num_procs; i++)
     {
         if(ctx->procs[i]->state==MOSS_PROCESS_STOPPED)
         {
             moss_delete_process(ctx, ctx->procs[i]);
+            i = 0;
         }
     }
 
+    _moss_log("DID IT\n");
+
     //TODO: make a critical section
+    spinlock_acquire(&ctx->global_sched_lock, SPINLOCK_WAIT_FOREVER);
     proc->pid = ++uuid_count;
     ctx->procs[ctx->num_procs++] = proc; //TODO: might need synch primitives..
+    spinlock_release(&ctx->global_sched_lock);
+
     return MOSS_SUCCESS;
 }
 
@@ -312,6 +346,7 @@ int moss_process_exec_queue_push(moss_process_exec_queue* queue, moss_process* p
 {
     spinlock_acquire(&queue->lock, SPINLOCK_WAIT_FOREVER);
 
+    _moss_log("Got Lock\n");
 
     // TODO: make sure this never goes off
     // TODO: should be more liberal with asserts
@@ -322,6 +357,8 @@ int moss_process_exec_queue_push(moss_process_exec_queue* queue, moss_process* p
     queue->num_elems++;
 
     spinlock_release(&queue->lock);
+
+    _moss_log("ADded to queue\n");
 
     return MOSS_SUCCESS;
 }
@@ -357,6 +394,8 @@ void _moss_prime_context_switch()
             if(idling)
                 _moss_log("- Exiting Idle State on Core %d\n", moss_core_id());
 
+            _moss_log("Switching procs\n");
+            heap_caps_check_integrity_all(1);
 
             
             //_moss_log("Next UP: %s on Core %d\n", next_proc->identifier, moss_core_id());
