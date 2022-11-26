@@ -44,6 +44,14 @@
 #define TOPOFSTACK_OFFS                 0x00    /* StackType_t *pxTopOfStack */
 #define CP_TOPOFSTACK_OFFS              0x04    /* xMPU_SETTINGS.coproc_area */
 
+
+// For Now
+#undef  XCHAL_CP_NUM
+#undef  XCHAL_HAVE_THREADPTR
+#define XCHAL_CP_NUM 0
+#define XCHAL_HAVE_THREADPTR 0
+
+
 .extern pxCurrentTCB
 
     .global     port_IntStack
@@ -428,6 +436,13 @@ _moss_xt_tick_timer_init:
     .align  4
 _moss_xt_dispatch:
 
+
+    // SWITCH TO IDLE STACK HERE
+    movi    a2, moss_idle_stack
+    getcoreid a3
+    addx4   a2,  a3, a2
+    l32i    sp, a2, 0
+
     #ifdef __XTENSA_CALL0_ABI__
     call0   _moss_prime_context_switch  // Get next TCB to resume
     movi    a2, moss_active_process
@@ -474,7 +489,8 @@ _moss_xt_dispatch:
     #endif
     //Can print numbers here:
 
-    l32i    a6,  sp, XT_SOL_PC
+    // HOLDUP
+    //l32i    a6,  sp, XT_SOL_PC
 
 
     /* As soons as PS is restored, interrupts can happen. No need to sync PS. */
@@ -490,10 +506,10 @@ _moss_xt_dispatch:
 
 // Skipping coprocessor stuff for now
 
-    #if XCHAL_CP_NUM > 0 && 0
+    #if XCHAL_CP_NUM > 0
     /* Restore CPENABLE from task's co-processor save area. */
     movi    a3, moss_active_process            /* cp_state =                       */
-    getcoreid a2
+    getcoreid a2vds
     addx4   a3,  a2, a3
     l32i    a3, a3, 0
     l32i    a2, a3, CP_TOPOFSTACK_OFFS     /* StackType_t                       *pxStack; */
@@ -535,20 +551,31 @@ _moss_xt_dispatch:
     .type   _moss_nop,@function
     .align 4
 _moss_nop:
-    ENTRY(16)
+    entry   sp,  16
     NOP
-    RET(16)
+    retw
 
 
     .global moss_core_id
     .type   moss_core_id,@function
     .align 4
 moss_core_id:
-    ENTRY(16)
+    entry   sp,  16
     
     getcoreid a2
 
-    RET(16)
+    retw
+
+
+    .global moss_sp
+    .type   moss_sp,@function
+    .align 4
+moss_sp:
+    entry   sp,  16
+    
+    mov a2, sp
+
+    retw
 
 /*
 **********************************************************************************************************
@@ -576,6 +603,7 @@ moss_ctx_switch:
 
     // For the most part this seems to be a lightweight version of the main context_store stuff.
     
+    //@ CHANGES STACK POINTER
     #ifdef __XTENSA_CALL0_ABI__
     addi    sp,  sp, -XT_SOL_FRMSZ
     #else
@@ -585,7 +613,7 @@ moss_ctx_switch:
     rsr     a2,  PS
     s32i    a0,  sp, XT_SOL_PC
     s32i    a2,  sp, XT_SOL_PS
-    #if XCHAL_HAVE_THREADPTR && 0
+    #if XCHAL_HAVE_THREADPTR
     rur.threadptr a2
     s32i    a2,  sp, XT_SOL_THREADPTR
     #endif
@@ -610,7 +638,7 @@ moss_ctx_switch:
 
     rsil    a2,  XCHAL_EXCM_LEVEL       /* disable low/med interrupts       */
 
-    #if XCHAL_CP_NUM > 0 && 0
+    #if XCHAL_CP_NUM > 0
     /* Save coprocessor callee-saved state (if any). At this point CPENABLE */
     /* should still reflect which CPs were in use (enabled).                */
     call0   _xt_coproc_savecs
@@ -630,7 +658,7 @@ moss_ctx_switch:
     // TODO: go back to just a s32i, avoid as much stack manipulation as possible.
     call4   _moss_prime_proc
 
-    #if XCHAL_CP_NUM > 0 && 0
+    #if XCHAL_CP_NUM > 0
     /* Clear CPENABLE, also in task's co-processor state save area. */
     l32i    a2,  a2, CP_TOPOFSTACK_OFFS /* a2 = pxCurrentTCB->cp_state      */
     movi    a3,  0

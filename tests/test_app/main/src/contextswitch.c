@@ -109,6 +109,10 @@ void context_switching_test()
     _moss_log("Context Overhead: %lld\n", overhead);
 
     _moss_log("Context Switches: %lld\n", end_switches-start_switches);
-    _moss_log("Switch Overhead Avg: %f\n", (double)overhead/(double)(end_switches-start_switches));
+
+
+    // Using Printf for float formatting
+    printf("Switch Overhead Avg: %f\n", (double)overhead/(double)(end_switches-start_switches));
+    //_moss_log();
 
 }

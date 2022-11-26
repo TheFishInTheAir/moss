@@ -7,10 +7,11 @@
 #include <matrix.h>
 #include <contextswitch.h>
 
-
+ 
 
 void app_main(void)
-{
+ {
+    _moss_log("Current Stack Ptr addr %#08X  TOS: %#08X SP: %#08X\n", moss_sp(), moss_current_process()->top_of_stack, moss_current_process()->stack);
 
     char version_buf[256];
     moss_version(version_buf, 256);

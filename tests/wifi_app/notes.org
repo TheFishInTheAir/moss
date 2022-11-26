@@ -1,0 +1,8 @@
+#+Title: Netcode Learning Notes
+#+Author: Ethan Breit
+
+* Sockets
+- What exactly is a Socket
+    - Vaguelly stated as a network endpoint (Logical Endpoint)
+    - Pseudo File for netork connection
+    - EXISTS ON TRANSPORT LAYER>M<

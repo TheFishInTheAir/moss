@@ -2,8 +2,9 @@
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos-wifi.h>
 
-#define PROFILING_PROCESS_LOOP_N (100)
+#define PROFILING_PROCESS_LOOP_N (100000)
 int testing_thing = 0;
 volatile int complete = 0;
 
@@ -18,6 +19,19 @@ void profiling_process()
     complete++;
 
     while(1){taskYIELD();}
+}
+
+volatile int got_idle = 0;
+
+void core1_idle()
+{
+    while(xPortGetCoreID()!=1)
+    {
+        taskYIELD();
+    }
+
+    got_idle = 1;
+    while(1);
 }
 
 #define NUM_PROCS 6
@@ -39,13 +53,20 @@ void context_switching_test()
     printf("End Time: %lld\n", fend);
     printf("Diff Time: %lld\n", fend-fstart);
 
+    xTaskCreate(core1_idle, "idle thing", 126*4, NULL, 1, NULL);
+
+    while(got_idle!=1)
+    {
+        taskYIELD();
+    }
+
     int64_t pstart = esp_timer_get_time();
     printf("Start Time: %lld\n", pstart);
 
     TaskHandle_t _handle;
     for(int i = 0; i < NUM_PROCS; i++)
     {
-        xTaskCreatePinnedToCore(profiling_process, "profiling_proc", 126*4, NULL, 1, &_handle, 0);
+        xTaskCreate(profiling_process, "profiling_proc", 126*4, NULL, 1, &_handle);
     }
 
     while(complete<NUM_PROCS)
@@ -67,7 +88,8 @@ void context_switching_test()
 
 void app_main(void)
 {
-    context_switching_test();
+    //context_switching_test();
+    run_wifi_test();
 
     while(1);
 }

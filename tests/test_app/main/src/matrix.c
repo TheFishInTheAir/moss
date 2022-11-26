@@ -5,6 +5,8 @@
 #include <moss.h>
 #include <synch.h>
 #include <scheduler.h>
+#include "esp_heap_caps.h"
+
 
 static int matrix_size = 0;
 
@@ -28,6 +30,8 @@ static inline int* indx_matrix(int* mat, int col, int row)
 
 void matrix_test_init(int size)
 {
+
+    _moss_log("Left heap bytes: %d\n", heap_caps_get_free_size(MALLOC_CAP_8BIT));
     matrix_size = size;
 
     mat_a = (int*) malloc(sizeof(int) * size * size);
@@ -92,6 +96,8 @@ void _matrix_test_multiply()
 
     moss_terminate();
 
+    assert(0&&"Makes no sense");
+    _moss_log("what the actual fuck tho.\n");
 }
 
 void matrix_test_multi_threaded()
@@ -122,7 +128,10 @@ void matrix_test_multi_threaded()
     while(complete!=MAT_THREADS)
     {
         moss_semaphore_wait(&completion);
-        complete++;
+        complete++;       
+        
+         _moss_log("thing happended\n");
+
     }
 }
 
@@ -200,6 +209,6 @@ void matrix_test_run_suite()
 
 
 
-    matrix_test_run_test(100);
+    //matrix_test_run_test(100);
     matrix_test_run_test(69);
 }

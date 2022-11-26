@@ -7,7 +7,7 @@
 #include <scheduler.h>
 
 
-static spinlock_t slock;
+spinlock_t _slock;
 
 void start_cpu_other_cores()
 {
@@ -17,7 +17,7 @@ void start_cpu_other_cores()
 
 void start_cpu0()
 {
-    spinlock_initialize(&slock);
+    spinlock_initialize(&_slock);
     moss_portlvl_init();
 }
 
@@ -32,23 +32,23 @@ void moss_version(char* buf, uint32_t size)
 
 void _moss_log_acquire()
 {
-    assert(spinlock_acquire(&slock, SPINLOCK_WAIT_FOREVER));
+    assert(spinlock_acquire(&_slock, SPINLOCK_WAIT_FOREVER));
 }
 
 void _moss_log_release()
 {
-    spinlock_release(&slock);
+    spinlock_release(&_slock);
 }
 
 
 // This is a temporary logging helper. Needed some synchronization for serial ownership
 // Eventually add 
-void _moss_log(const char* format, ...)
+void _moose_log(const char* format, ...)
 {
-    assert(spinlock_acquire(&slock, SPINLOCK_WAIT_FOREVER));
+    assert(spinlock_acquire(&_slock, SPINLOCK_WAIT_FOREVER));
     va_list argptr;
     va_start(argptr, format);
-    vprintf(format, argptr);
+    //esp_rom_vprintf(format, argptr);
 
-    spinlock_release(&slock);
+    spinlock_release(&_slock);
 }

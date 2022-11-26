@@ -16,10 +16,13 @@
 
 
 #define STACK_DEPTH 1024*10
+#define IDLE_STACK_DEPTH 1024
 
 #define TAG "moss_scheduler"
 
-volatile moss_scheduler_context sched_ctx;
+moss_scheduler_context sched_ctx;
+volatile uint8_t* moss_idle_stack[NUM_CORES] = {NULL};
+
 volatile moss_process* moss_active_process[NUM_CORES] = {NULL};
 volatile moss_process* moss_process_backbuffer[NUM_CORES] = {NULL};
 
@@ -27,6 +30,7 @@ int _moss_scheduler_register_proc(moss_scheduler_context* ctx, moss_process* pro
 int _moss_scheduler_preempt(moss_scheduler_context* ctx);
 
 void _moss_prime_context_switch();
+void moss_dump_current_process_debug();
 
 /***********
  * PROCESS *
@@ -36,11 +40,9 @@ void _moss_prime_context_switch();
 // Proc ref can be null
 int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
                           char* identifier, void(*entry_point)(), void* user_ptr)
-{
+{                 
     moss_process* proc;
     PROP(moss_create_proc(ctx, &proc, identifier, entry_point, user_ptr));
-
-    _moss_log("Boop\n");
 
     PROP(moss_process_exec_queue_push(&ctx->queue, proc));
 
@@ -64,7 +66,7 @@ uint8_t* _moss_init_stack(moss_process* proc)
     // Heavy Inspo from the freertos port code but simplified
 
     uint8_t *sp, *tos;
-    tos = (uint8_t*) proc->top_of_stack;
+    tos = (uint8_t*) ((int)proc->top_of_stack & ~0xf);
     sp  = (uint8_t*) (((moss_address)tos-XT_STK_FRMSZ)& ~0xf);
 
     // Set Stack Frame to recognizable pattern
@@ -89,6 +91,10 @@ uint8_t* _moss_init_stack(moss_process* proc)
     //frame->ps = PS_UM | PS_EXCM;
     frame->ps = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
 
+    //@Cleanup
+    //_moss_log("Stack Ptr addr %#08X\n", sp);
+    //_moss_log("Current Stack Ptr addr %#08X\n", moss_sp());
+
     return sp;
 }
 
@@ -99,12 +105,10 @@ int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
     proc = (moss_process*) malloc(sizeof(moss_process));
 
     if(proc_ref!=NULL)
-        *proc_ref = proc;
-
-    _moss_log("Making your mum\n");
-    heap_caps_check_integrity_all(1);
-    _moss_log("made your mum\n");
-
+    {
+        (*proc_ref) = proc;
+    }
+    
     strcpy(proc->identifier, identifier);
     proc->entry_point = (void*)entry_point;
     proc->instruction_ptr = NULL;
@@ -117,12 +121,9 @@ int moss_create_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
     proc->top_of_stack = proc->stack+(STACK_DEPTH-1);
 
 
-    _moss_log("Making your mum 2 \n");
     // Initialise stack frame.
     proc->top_of_stack = _moss_init_stack(proc);
     proc->primed = 1;
-
-    _moss_log("Making your mum --- \n");
 
     PROP(_moss_scheduler_register_proc(ctx, proc));
 
@@ -139,8 +140,11 @@ int moss_delete_process(moss_scheduler_context* ctx, moss_process* proc)
         return MOSS_FAIL;
 
 
+    //@Cleanup
+    _moss_log("Freeing proc Stack of PID: %d ... total procs left:  %d \n", proc->pid, ctx->num_procs);
+    //for(int i = 0; i < ctx->num_procs; i++)
+        //_moss_log(" -- procs: ID '%s' PID %d State %d \n", ctx->procs[i]->identifier, ctx->procs[i]->pid, ctx->procs[i]->state);
 
-    _moss_log("Freed Stack\n");
 
     char found = 0;
 
@@ -158,10 +162,9 @@ int moss_delete_process(moss_scheduler_context* ctx, moss_process* proc)
 
     ctx->num_procs--;
 
-    // Leading to heap corruption
-    
     free(proc->stack);
     free(proc);
+
 
     spinlock_release(&ctx->global_sched_lock);
 
@@ -174,9 +177,16 @@ void moss_terminate()
 {
     moss_current_process()->state = MOSS_PROCESS_STOPPED;
 
+    //@Cleanup
     //moss_delete_process(moss_sched(), moss_current_process());
     //moss_yield_without_queue();
-    _moss_dispatch();
+    moss_ctx_switch();
+
+    // the call0 in dispatch is leading to some weird stuff
+    //_moss_dispatch();
+
+
+    assert(0 && "what the hell");
     //_moss_dispatch();
 }
 
@@ -186,7 +196,7 @@ void moss_terminate()
  *************/
 
 
-volatile moss_scheduler_context* moss_sched()
+moss_scheduler_context* moss_sched()
 {
     assert(sched_ctx.init_flag==MOSS_INIT_CONST);
     return &sched_ctx;
@@ -199,8 +209,42 @@ int moss_scheduler_init()
     sched_ctx.init_flag = MOSS_INIT_CONST;
     spinlock_initialize(&sched_ctx.global_sched_lock);
     PROP(moss_process_exec_queue_init(&sched_ctx.queue));
+
+    for(int i = 0; i < NUM_CORES; i++)
+    {
+        int bos = (int) malloc(IDLE_STACK_DEPTH);
+        int tos = bos+(IDLE_STACK_DEPTH-1);
+        moss_idle_stack[i] = (uint8_t*) (tos& ~0xf);
+    }
     
     return MOSS_SUCCESS;
+}
+
+//TODO: maybe just clean up for the current core because that removes the null check
+//      and we can be lazy with cleaning up processes 
+void _moss_scheduler_cleanup_dead_procs(moss_scheduler_context* ctx)
+{   
+    for(int i = 0; i < ctx->num_procs; i++)
+    {
+        if(ctx->procs[i]->state==MOSS_PROCESS_STOPPED)
+        {
+            char abort = 0;
+            for(int core = 0; core < NUM_CORES; core++)
+            {
+                if(moss_active_process[core]==NULL)
+                    continue;
+                // Prevent deleting stack if the core is still moving onto next process.
+                if(moss_active_process[core]->pid==ctx->procs[i]->pid)
+                    abort = 1;
+            }
+
+            if(abort)
+                continue;
+
+            moss_delete_process(ctx, ctx->procs[i]);
+            i = 0;
+        }
+    }
 }
 
 static int uuid_count = 0;
@@ -213,17 +257,7 @@ int _moss_scheduler_register_proc(moss_scheduler_context* ctx, moss_process* pro
         return MOSS_FAIL;
     }
 
-    _moss_log("Freeing Old procs\n");
-    for(int i = 0; i < ctx->num_procs; i++)
-    {
-        if(ctx->procs[i]->state==MOSS_PROCESS_STOPPED)
-        {
-            moss_delete_process(ctx, ctx->procs[i]);
-            i = 0;
-        }
-    }
-
-    _moss_log("DID IT\n");
+    _moss_scheduler_cleanup_dead_procs(ctx);
 
     //TODO: make a critical section
     spinlock_acquire(&ctx->global_sched_lock, SPINLOCK_WAIT_FOREVER);
@@ -244,7 +278,7 @@ moss_process* moss_scheduler_find_proc_id(moss_scheduler_context* ctx, char* id)
     return NULL;
 }
 
-moss_process* moss_scheduler_find_proc_pid(moss_scheduler_context* ctx, uint8_t pid)
+moss_process* moss_schedzuler_find_proc_pid(moss_scheduler_context* ctx, uint8_t pid)
 {
     for(int i = 0; i < ctx->num_procs; i++)
     {
@@ -346,8 +380,6 @@ int moss_process_exec_queue_push(moss_process_exec_queue* queue, moss_process* p
 {
     spinlock_acquire(&queue->lock, SPINLOCK_WAIT_FOREVER);
 
-    _moss_log("Got Lock\n");
-
     // TODO: make sure this never goes off
     // TODO: should be more liberal with asserts
     assert(queue->num_elems<queue->ring_size);
@@ -357,8 +389,6 @@ int moss_process_exec_queue_push(moss_process_exec_queue* queue, moss_process* p
     queue->num_elems++;
 
     spinlock_release(&queue->lock);
-
-    _moss_log("ADded to queue\n");
 
     return MOSS_SUCCESS;
 }
@@ -394,28 +424,41 @@ void _moss_prime_context_switch()
             if(idling)
                 _moss_log("- Exiting Idle State on Core %d\n", moss_core_id());
 
-            _moss_log("Switching procs\n");
-            heap_caps_check_integrity_all(1);
-
-            
-            //_moss_log("Next UP: %s on Core %d\n", next_proc->identifier, moss_core_id());
-
-            next_proc->state = MOSS_PROCESS_RUNNING;
-            
-            moss_active_process[moss_core_id()] = next_proc;
-
             while(next_proc->primed==0)
             {_moss_nop();}
+            
+            next_proc->state = MOSS_PROCESS_RUNNING;
+
+            //if(moss_current_process()!=NULL)
+                //moss_dump_current_process_debug();
+
+            // After this gets switched cant guarantee access to a stack.
+            moss_active_process[moss_core_id()] = next_proc;
+
+            /*
+
+            moss_active_process[moss_core_id()]->primed=0;
+
+            if(moss_active_process[moss_core_id()]->pid == 1)
+            {
+                _moss_log("Going to main thread\n");
+
+            }*/
+            //moss_dump_current_process_debug();
+            //moss_process_exec_queue_debug_dump(&moss_sched()->queue);
 
             return;
         }
+
+        //TODO: only switch stack pointer for this
 
         if(!idling)
             _moss_log("- No More Processes, Idling on Core %d\n", moss_core_id());
 
         idling = 1;
+        _moss_log("- Continuous Idling on Core %d\n", moss_core_id());
 
-        for(int i = 0; i < 100000; i++)
+        for(unsigned int i = 0; i < 100000; i++)
         {_moss_nop();}
 
     }
@@ -427,10 +470,11 @@ void moss_yield_without_queue()
 {
     switches++;
  
+    moss_current_process()->state = MOSS_PROCESS_WAITING;
+    
     moss_ctx_switch();
 
     // Janky spot for this tbh. It does work for now though.
-    moss_current_process()->primed=0;
 }
 
 void _moss_prime_proc()
@@ -441,7 +485,7 @@ void _moss_prime_proc()
 void _moss_dump_current_stack()
 {
     _moss_log_acquire();
-    ESP_LOG_BUFFER_HEXDUMP(TAG, moss_current_process()->top_of_stack, 256, ESP_LOG_INFO);
+    ESP_LOG_BUFFER_HEXDUMP(TAG, (void*)moss_current_process()->top_of_stack, 256, ESP_LOG_INFO);
     _moss_log_release();
 }
 
@@ -449,15 +493,13 @@ void moss_yield()
 {
     switches++;
     _moss_push_active_process();
-    
+    //_moss_log("YIELD: Current Stack Ptr addr %#08X  TOS: %#08X SP: %#08X\n", moss_sp(), moss_current_process()->top_of_stack, moss_current_process()->stack);
     moss_ctx_switch();
-    moss_current_process()->primed=0;
 }
 
 void _moss_dispatch()
 {
     switches++;
-    
     __asm__ volatile ("call0    _moss_xt_dispatch\n");
 }
 
@@ -476,8 +518,19 @@ void moss_dump_current_process_debug()
 {
     moss_process* active = moss_current_process();
 
-    _moss_log("Proc: '%s' TOS: %#08X SP: %#08X\n", 
+    /*_moss_log("Proc: '%s' TOS: %#08X SP: %#08X\n", 
+    *            active->identifier, 
+    *            (moss_address) active->top_of_stack, 
+    *            (moss_address) active->stack);
+    */
+    XtExcFrame* frame = (XtExcFrame*) active->top_of_stack;
+    _moss_log("Proc: '%s' PID: %d TOS: %08x SP: %08x PC: %08x a10: %08x EXIT: %08x (CORE %d)\n", 
                 active->identifier, 
+                active->pid,
                 (moss_address) active->top_of_stack, 
-                (moss_address) active->stack);
+                (moss_address) active->stack,
+                (moss_address) frame->pc,
+                (moss_address) frame->a10,
+                (moss_address) frame->exit,
+                moss_core_id());
 }

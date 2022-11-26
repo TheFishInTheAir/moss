@@ -10,7 +10,11 @@
         "esp_log.h": "c",
         "bitset": "c",
         "esp_timer.h": "c",
-        "thread": "c"
+        "thread": "c",
+        "complex": "c",
+        "compare": "c",
+        "wifi.h": "c",
+        "nvs_flash.h": "c"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/moss"
 

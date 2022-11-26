@@ -1,0 +1,752 @@
+
+prog:     file format elf32-xtensa-le
+
+
+Disassembly of section .interp:
+
+000000d4 <.interp>:
+  d4:	2f          	.byte 0x2f
+  d5:	696c      	movi.n	a9, -26
+  d7:	6c2f62        	l32i	a6, a15, 0x1b0
+  da:	732e64        	lsi	f6, a14, 0x1cc
+  dd:	6f          	.byte 0x6f
+	...
+
+Disassembly of section .hash:
+
+000000e0 <.hash>:
+  e0:	000001        	l32r	a0, fffc00e0 <_end+0xfffbed04>
+  e3:	000100        	lsi	f0, a1, 0
+	...
+
+Disassembly of section .dynsym:
+
+000000f0 <.dynsym>:
+	...
+
+Disassembly of section .dynstr:
+
+00000100 <.dynstr>:
+	...
+
+Disassembly of section .rela.dyn:
+
+00000104 <.rela.dyn>:
+ 104:	0001a0        	jx	a1
+ 107:	000500        	lsi	f0, a5, 0
+ 10a:	000000        	ill
+ 10d:	000000        	ill
+ 110:	0001a4        	lsi	f10, a1, 0
+ 113:	000500        	lsi	f0, a5, 0
+ 116:	000000        	ill
+ 119:	000000        	ill
+ 11c:	01a8      	l32i.n	a10, a1, 0
+ 11e:	050000        	extui	a0, a0, 16, 1
+ 121:	000000        	ill
+ 124:	000000        	ill
+ 127:	01ac00        	slli	a10, a12, 32
+ 12a:	050000        	extui	a0, a0, 16, 1
+ 12d:	000000        	ill
+ 130:	000000        	ill
+ 133:	01b400        	slli	a11, a4, 32
+ 136:	050000        	extui	a0, a0, 16, 1
+ 139:	000000        	ill
+ 13c:	000000        	ill
+ 13f:	01bc00        	slli	a11, a12, 32
+ 142:	050000        	extui	a0, a0, 16, 1
+ 145:	000000        	ill
+ 148:	000000        	ill
+ 14b:	01c000        	slli	a12, a0, 32
+ 14e:	050000        	extui	a0, a0, 16, 1
+ 151:	000000        	ill
+ 154:	000000        	ill
+ 157:	01c400        	slli	a12, a4, 32
+ 15a:	050000        	extui	a0, a0, 16, 1
+ 15d:	000000        	ill
+ 160:	000000        	ill
+ 163:	01c800        	slli	a12, a8, 32
+ 166:	050000        	extui	a0, a0, 16, 1
+ 169:	000000        	ill
+ 16c:	000000        	ill
+ 16f:	01d000        	slli	a13, a0, 32
+ 172:	050000        	extui	a0, a0, 16, 1
+ 175:	000000        	ill
+ 178:	000000        	ill
+ 17b:	01d800        	slli	a13, a8, 32
+ 17e:	050000        	extui	a0, a0, 16, 1
+ 181:	000000        	ill
+ 184:	000000        	ill
+ 187:	01dc00        	slli	a13, a12, 32
+ 18a:	050000        	extui	a0, a0, 16, 1
+ 18d:	000000        	ill
+ 190:	000000        	ill
+ 193:	01e000        	slli	a14, a0, 32
+ 196:	050000        	extui	a0, a0, 16, 1
+ 199:	000000        	ill
+ 19c:	000000        	ill
+	...
+
+Disassembly of section .text:
+
+000001a0 <_init-0x44>:
+ 1a0:	84 02 00 00 	
+ 1a4:	a0 02 00 00 	
+ 1a8:	b8 02 00 00 	
+ 1ac:	bc 13 00 00 	
+ 1b0:	00 00 00 00 	
+ 1b4:	bc 13 00 00 	
+ 1b8:	00 00 00 00 	
+ 1bc:	bc 13 00 00 	
+ 1c0:	0c 13 00 00 	
+ 1c4:	08 13 00 00 	
+ 1c8:	c0 13 00 00 	
+ 1cc:	00 00 00 00 	
+ 1d0:	fc 02 00 00 	
+ 1d4:	00 00 00 00 	
+ 1d8:	c4 13 00 00 	
+ 1dc:	00 13 00 00 	
+ 1e0:	38 02 00 00 	
+
+000001e4 <_init>:
+ 1e4:	008136        	entry	a1, 64
+ 1e7:	ffee81        	l32r	a8, 1a0 <_init-0x44>
+ 1ea:	0008e0        	callx8	a8
+ 1ed:	ffed81        	l32r	a8, 1a4 <_init-0x40>
+ 1f0:	0008e0        	callx8	a8
+ 1f3:	f01d      	retw.n
+
+000001f5 <_start>:
+ 1f5:	ffec41        	l32r	a4, 1a8 <_init-0x3c>
+ 1f8:	0004a0        	jx	a4
+	...
+
+000001fc <deregister_tm_clones>:
+ 1fc:	004136        	entry	a1, 32
+ 1ff:	ffeba1        	l32r	a10, 1ac <_init-0x38>
+ 202:	ffec81        	l32r	a8, 1b4 <_init-0x30>
+ 205:	0718a7        	beq	a8, a10, 210 <deregister_tm_clones+0x14>
+ 208:	ffea81        	l32r	a8, 1b0 <_init-0x34>
+ 20b:	188c      	beqz.n	a8, 210 <deregister_tm_clones+0x14>
+ 20d:	0008e0        	callx8	a8
+ 210:	f01d      	retw.n
+	...
+
+00000214 <register_tm_clones>:
+ 214:	004136        	entry	a1, 32
+ 217:	ffe5a1        	l32r	a10, 1ac <_init-0x38>
+ 21a:	ffe6b1        	l32r	a11, 1b4 <_init-0x30>
+ 21d:	c0bba0        	sub	a11, a11, a10
+ 220:	2182b0        	srai	a8, a11, 2
+ 223:	05bfb0        	extui	a11, a11, 31, 1
+ 226:	bb8a      	add.n	a11, a11, a8
+ 228:	21b1b0        	srai	a11, a11, 1
+ 22b:	6b8c      	beqz.n	a11, 235 <register_tm_clones+0x21>
+ 22d:	ffe281        	l32r	a8, 1b8 <_init-0x2c>
+ 230:	188c      	beqz.n	a8, 235 <register_tm_clones+0x21>
+ 232:	0008e0        	callx8	a8
+ 235:	f01d      	retw.n
+	...
+
+00000238 <__do_global_dtors_aux>:
+ 238:	004136        	entry	a1, 32
+ 23b:	ffe031        	l32r	a3, 1bc <_init-0x28>
+ 23e:	000322        	l8ui	a2, a3, 0
+ 241:	c2fc      	bnez.n	a2, 281 <__do_global_dtors_aux+0x49>
+ 243:	ffe041        	l32r	a4, 1c4 <_init-0x20>
+ 246:	ffde21        	l32r	a2, 1c0 <_init-0x24>
+ 249:	045d      	mov.n	a5, a4
+ 24b:	c02240        	sub	a2, a2, a4
+ 24e:	212220        	srai	a2, a2, 2
+ 251:	ffdd41        	l32r	a4, 1c8 <_init-0x1c>
+ 254:	220b      	addi.n	a2, a2, -1
+ 256:	0002c6        	j	265 <__do_global_dtors_aux+0x2d>
+ 259:	881b      	addi.n	a8, a8, 1
+ 25b:	0489      	s32i.n	a8, a4, 0
+ 25d:	a08850        	addx4	a8, a8, a5
+ 260:	0888      	l32i.n	a8, a8, 0
+ 262:	0008e0        	callx8	a8
+ 265:	0488      	l32i.n	a8, a4, 0
+ 267:	ee3827        	bltu	a8, a2, 259 <__do_global_dtors_aux+0x21>
+ 26a:	fff925        	call8	1fc <deregister_tm_clones>
+ 26d:	ffd721        	l32r	a2, 1cc <_init-0x18>
+ 270:	008216        	beqz	a2, 27c <__do_global_dtors_aux+0x44>
+ 273:	ffd7a1        	l32r	a10, 1d0 <_init-0x14>
+ 276:	ffd581        	l32r	a8, 1cc <_init-0x18>
+ 279:	0008e0        	callx8	a8
+ 27c:	120c      	movi.n	a2, 1
+ 27e:	004322        	s8i	a2, a3, 0
+ 281:	f01d      	retw.n
+	...
+
+00000284 <frame_dummy>:
+ 284:	004136        	entry	a1, 32
+ 287:	ffd381        	l32r	a8, 1d4 <_init-0x10>
+ 28a:	00b816        	beqz	a8, 299 <frame_dummy+0x15>
+ 28d:	ffd2b1        	l32r	a11, 1d8 <_init-0xc>
+ 290:	ffd0a1        	l32r	a10, 1d0 <_init-0x14>
+ 293:	ffd081        	l32r	a8, 1d4 <_init-0x10>
+ 296:	0008e0        	callx8	a8
+ 299:	fff7a5        	call8	214 <register_tm_clones>
+ 29c:	f01d      	retw.n
+	...
+
+000002a0 <__do_global_ctors_aux>:
+ 2a0:	004136        	entry	a1, 32
+ 2a3:	ffce21        	l32r	a2, 1dc <_init-0x8>
+ 2a6:	000146        	j	2af <__do_global_ctors_aux+0xf>
+ 2a9:	0008e0        	callx8	a8
+ 2ac:	fcc222        	addi	a2, a2, -4
+ 2af:	0288      	l32i.n	a8, a2, 0
+ 2b1:	f40866        	bnei	a8, -1, 2a9 <__do_global_ctors_aux+0x9>
+ 2b4:	f01d      	retw.n
+	...
+
+000002b8 <main>:
+ 2b8:	004136        	entry	a1, 32
+ 2bb:	65a022        	movi	a2, 101
+ 2be:	f01d      	retw.n
+
+000002c0 <_fini>:
+ 2c0:	008136        	entry	a1, 64
+ 2c3:	ffc781        	l32r	a8, 1e0 <_init-0x4>
+ 2c6:	0008e0        	callx8	a8
+ 2c9:	f01d      	retw.n
+
+Disassembly of section .got.loc:
+
+000002cc <.got.loc>:
+ 2cc:	0001a0        	jx	a1
+ 2cf:	004400        	break	4, 0
+	...
+
+Disassembly of section .eh_frame:
+
+000002fc <__FRAME_END__>:
+ 2fc:	000000        	ill
+	...
+
+Disassembly of section .ctors:
+
+00001300 <__CTOR_LIST__>:
+    1300:	ff          	.byte 0xff
+    1301:	ff          	.byte 0xff
+    1302:	ff          	.byte 0xff
+    1303:	ff          	.byte 0xff
+
+00001304 <__CTOR_END__>:
+    1304:	000000        	ill
+	...
+
+Disassembly of section .dtors:
+
+00001308 <__DTOR_LIST__>:
+    1308:	ff          	.byte 0xff
+    1309:	ff          	.byte 0xff
+    130a:	ff          	.byte 0xff
+    130b:	ff          	.byte 0xff
+
+0000130c <__DTOR_END__>:
+    130c:	000000        	ill
+	...
+
+Disassembly of section .dynamic:
+
+00001310 <.dynamic>:
+    1310:	000c      	movi.n	a0, 0
+    1312:	e40000        	extui	a0, a0, 0, 15
+    1315:	000001        	l32r	a0, fffc1318 <_end+0xfffbff3c>
+    1318:	000d      	mov.n	a0, a0
+    131a:	c00000        	sub	a0, a0, a0
+    131d:	000002        	l8ui	a0, a0, 0
+    1320:	000004        	lsi	f0, a0, 0
+    1323:	00e000        	lsi	f0, a0, 0
+    1326:	050000        	extui	a0, a0, 16, 1
+    1329:	000000        	ill
+    132c:	000100        	lsi	f0, a1, 0
+    132f:	000600        	lsi	f0, a6, 0
+    1332:	f00000        	subx8	a0, a0, a0
+    1335:	000000        	ill
+    1338:	000a      	add.n	a0, a0, a0
+    133a:	010000        	slli	a0, a0, 32
+    133d:	000000        	ill
+    1340:	000b      	addi.n	a0, a0, -1
+    1342:	100000        	and	a0, a0, a0
+    1345:	000000        	ill
+    1348:	000015        	call4	134c <_DYNAMIC+0x3c>
+    134b:	000000        	ill
+    134e:	030000        	rsr.lbeg	a0
+    1351:	000000        	ill
+    1354:	13b8      	l32i.n	a11, a3, 4
+    1356:	070000        	lsi	f0, a0, 28
+    1359:	000000        	ill
+    135c:	000104        	lsi	f0, a1, 0
+    135f:	000800        	lsi	f0, a8, 0
+    1362:	9c0000        	lsi	f0, a0, 0x270
+    1365:	000000        	ill
+    1368:	0009      	s32i.n	a0, a0, 0
+    136a:	0c0000        	lsi	f0, a0, 48
+    136d:	000000        	ill
+    1370:	000000        	ill
+    1373:	02cc70        	andb	b12, b12, b7
+    1376:	010000        	slli	a0, a0, 32
+    1379:	700000        	lsi	f0, a0, 0x1c0
+    137c:	000001        	l32r	a0, fffc137c <_end+0xfffbffa0>
+    137f:	fffb00        	f64cmph	a15, a11, a0, 15
+    1382:	ff          	.byte 0xff
+    1383:	6f          	.byte 0x6f
+    1384:	000000        	ill
+    1387:	f908      	l32i.n	a0, a9, 60
+    1389:	ff          	.byte 0xff
+    138a:	ff          	.byte 0xff
+    138b:	6f          	.byte 0x6f
+    138c:	000d      	mov.n	a0, a0
+	...
+
+Disassembly of section .got:
+
+000013b8 <.got>:
+    13b8:	001310        	movsp	a1, a3
+	...
+
+Disassembly of section .bss:
+
+000013bc <completed$2>:
+    13bc:	000000        	ill
+	...
+
+000013c0 <dtor_idx$1>:
+    13c0:	000000        	ill
+	...
+
+000013c4 <object$0>:
+	...
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	434347        	ball	a3, a4, 47 <_init-0x19d>
+   3:	203a      	add.n	a2, a0, a3
+   5:	6328      	l32i.n	a2, a3, 24
+   7:	736f72        	s32i	a7, a15, 0x1cc
+   a:	6f7473        	lsi	f7, a4, 0x1bc
+   d:	6f          	.byte 0x6f
+   e:	2d6c      	movi.n	a13, -30
+  10:	4e          	.byte 0x4e
+  11:	652047        	blt	a0, a4, 7a <_init-0x16a>
+  14:	2d7073        	lsi	f7, a0, 180
+  17:	323032        	lsi	f3, a0, 200
+  1a:	317232        	lsi	f3, a2, 196
+  1d:	2029      	s32i.n	a2, a0, 8
+  1f:	2e3131        	l32r	a3, fffcb8e4 <_end+0xfffca508>
+  22:	302e32        	l32i	a3, a14, 192
+	...
+
+Disassembly of section .xtensa.info:
+
+00000000 <.xtensa.info>:
+   0:	000c      	movi.n	a0, 0
+   2:	200000        	or	a0, a0, a0
+   5:	000000        	ill
+   8:	000001        	l32r	a0, fffc0008 <_end+0xfffbec2c>
+   b:	745800        	extui	a5, a0, 8, 8
+   e:	736e65        	call8	736f4 <_end+0x72318>
+  11:	495f61        	l32r	a6, fffd2590 <_end+0xfffd11b4>
+  14:	6e          	.byte 0x6e
+  15:	006f66        	bnei	a15, 6, 19 <_init-0x1cb>
+  18:	455355        	call4	45550 <_end+0x44174>
+  1b:	5f          	.byte 0x5f
+  1c:	534241        	l32r	a4, fffd4d24 <_end+0xfffd3948>
+  1f:	4f          	.byte 0x4f
+  20:	554c      	movi.n	a5, 69
+  22:	5f4554        	lsi	f5, a5, 0x17c
+  25:	494c      	movi.n	a9, 68
+  27:	524554        	lsi	f5, a5, 0x148
+  2a:	534c41        	l32r	a4, fffd4d5c <_end+0xfffd3980>
+  2d:	303d      	lsi	f3, a0, 0
+  2f:	410a      	add.n	a4, a1, a0
+  31:	3d4942        	s8i	a4, a9, 61
+  34:	000a30        	lsi	f3, a10, 0
+	...
+
+Disassembly of section .debug_aranges:
+
+00000000 <.debug_aranges>:
+   0:	001c      	movi.n	a0, 16
+   2:	020000        	andb	b0, b0, b0
+   5:	000000        	ill
+   8:	040000        	extui	a0, a0, 0, 1
+   b:	000000        	ill
+   e:	f50000        	extui	a0, a0, 16, 16
+  11:	000001        	l32r	a0, fffc0014 <_end+0xfffbec38>
+  14:	000006        	j	18 <_init-0x1cc>
+	...
+
+Disassembly of section .debug_info:
+
+00000000 <.debug_info>:
+   0:	000020        	lsi	f2, a0, 0
+   3:	000500        	lsi	f0, a5, 0
+   6:	000401        	l32r	a0, fffc0018 <_end+0xfffbec3c>
+   9:	000000        	ill
+   c:	000001        	l32r	a0, fffc000c <_end+0xfffbec30>
+   f:	f50000        	extui	a0, a0, 16, 16
+  12:	000001        	l32r	a0, fffc0014 <_end+0xfffbec38>
+  15:	000006        	j	19 <_init-0x1cb>
+  18:	070000        	lsi	f0, a0, 28
+  1b:	000000        	ill
+  1e:	006a      	add.n	a0, a0, a6
+  20:	010000        	slli	a0, a0, 32
+  23:	80          	.byte 0x80
+
+Disassembly of section .debug_abbrev:
+
+00000000 <.debug_abbrev>:
+   0:	001101        	l32r	a0, fffc0044 <_end+0xfffbec68>
+   3:	111710        	slli	a1, a7, 15
+   6:	0f1201        	l32r	a0, fffc3c50 <_end+0xfffc2874>
+   9:	1b0e03        	lsi	f0, a14, 108
+   c:	0e          	.byte 0xe
+   d:	130e25        	call8	130f0 <_end+0x11d14>
+  10:	000005        	call0	14 <_init-0x1d0>
+	...
+
+Disassembly of section .debug_line:
+
+00000000 <.debug_line>:
+   0:	004c      	movi.n	a0, 64
+   2:	050000        	extui	a0, a0, 16, 1
+   5:	000400        	lsi	f0, a4, 0
+   8:	2e          	.byte 0x2e
+   9:	000000        	ill
+   c:	010101        	l32r	a0, fffc0410 <_end+0xfffbf034>
+   f:	0efb      	addi.n	a0, a14, 15
+  11:	000d      	mov.n	a0, a0
+  13:	010101        	l32r	a0, fffc0418 <_end+0xfffbf03c>
+  16:	000001        	l32r	a0, fffc0018 <_end+0xfffbec3c>
+  19:	000100        	lsi	f0, a1, 0
+  1c:	010100        	slli	a0, a1, 32
+  1f:	021f01        	l32r	a0, fffc089c <_end+0xfffbf4c0>
+	...
+  2a:	1f0102        	l8ui	a0, a1, 31
+  2d:	020f02        	l8ui	a0, a15, 2
+  30:	004c      	movi.n	a0, 64
+  32:	000000        	ill
+  35:	004c      	movi.n	a0, 64
+  37:	010000        	slli	a0, a0, 32
+  3a:	020500        	andb	b0, b5, b0
+  3d:	0001f5        	call12	5c <_init-0x188>
+  40:	1d0300        	lsi	f0, a3, 116
+  43:	010301        	l32r	a0, fffc0450 <_end+0xfffbf074>
+  46:	0309      	s32i.n	a0, a3, 0
+  48:	090100        	l32e	a0, a1, -64
+  4b:	000003        	lsi	f0, a0, 0
+  4e:	01          	.byte 0x1
+  4f:	01          	.byte 0x1
+
+Disassembly of section .debug_str:
+
+00000000 <.debug_str>:
+   0:	747263        	lsi	f6, a2, 0x1d0
+   3:	532e30        	max	a2, a14, a3
+   6:	622f00        	lsi	f0, a15, 0x188
+   9:	6c6975        	call12	6c6a0 <_end+0x6b2c4>
+   c:	2f7364        	lsi	f6, a3, 188
+   f:	6469      	s32i.n	a6, a4, 24
+  11:	632f66        	bnei	a15, 2, 78 <_init-0x16c>
+  14:	736f72        	s32i	a7, a15, 0x1cc
+  17:	6f7473        	lsi	f7, a4, 0x1bc
+  1a:	6f          	.byte 0x6f
+  1b:	2d6c      	movi.n	a13, -30
+  1d:	4e          	.byte 0x4e
+  1e:	2e2f47        	blt	a15, a4, 50 <_init-0x194>
+  21:	697562        	lsi	f6, a5, 0x1a4
+  24:	646c      	movi.n	a4, -26
+  26:	2f          	.byte 0x2f
+  27:	7478      	l32i.n	a7, a4, 28
+  29:	736e65        	call8	73710 <_end+0x72334>
+  2c:	652d61        	l32r	a6, fffd94e0 <_end+0xfffd8104>
+  2f:	337073        	lsi	f7, a0, 204
+  32:	652d32        	l32i	a3, a13, 0x194
+  35:	666c      	movi.n	a6, -26
+  37:	2f          	.byte 0x2f
+  38:	697562        	lsi	f6, a5, 0x1a4
+  3b:	646c      	movi.n	a4, -26
+  3d:	2f          	.byte 0x2f
+  3e:	697562        	lsi	f6, a5, 0x1a4
+  41:	646c      	movi.n	a4, -26
+  43:	6c2d      	lsi	f2, a12, 48
+  45:	6269      	s32i.n	a6, a2, 24
+  47:	782f63        	lsi	f6, a15, 0x1e0
+  4a:	6e6574        	lsi	f7, a5, 0x1b8
+  4d:	2d6173        	lsi	f7, a1, 180
+  50:	707365        	call8	70788 <_end+0x6f3ac>
+  53:	2d3233        	lsi	f3, a2, 180
+  56:	666c65        	call8	6671c <_end+0x65340>
+  59:	2f          	.byte 0x2f
+  5a:	696c      	movi.n	a9, -26
+  5c:	6c6762        	s32i	a6, a7, 0x1b0
+  5f:	6f          	.byte 0x6f
+  60:	2f7373        	lsi	f7, a3, 188
+  63:	7478      	l32i.n	a7, a4, 28
+  65:	736e65        	call8	7374c <_end+0x72370>
+  68:	470061        	l32r	a6, fffd1c68 <_end+0xfffd088c>
+  6b:	4e          	.byte 0x4e
+  6c:	412055        	call4	41274 <_end+0x3fe98>
+  6f:	322053        	lsi	f5, a0, 200
+  72:	2e          	.byte 0x2e
+  73:	2e3533        	lsi	f3, a5, 184
+  76:	31          	.byte 0x31
+	...
+
+Disassembly of section .xt.lit:
+
+00000000 <.xt.lit>:
+   0:	0001a0        	jx	a1
+   3:	004400        	break	4, 0
+	...
+
+Disassembly of section .xt.prop:
+
+00000000 <.xt.prop>:
+   0:	01a8      	l32i.n	a10, a1, 0
+   2:	040000        	extui	a0, a0, 0, 1
+   5:	000000        	ill
+   8:	000001        	l32r	a0, fffc0008 <_end+0xfffbec2c>
+   b:	01f500        	slli	a15, a5, 32
+   e:	060000        	lsi	f0, a0, 24
+  11:	000000        	ill
+  14:	000002        	l8ui	a0, a0, 0
+  17:	01fb00        	slli	a15, a11, 32
+  1a:	000000        	ill
+  1d:	000000        	ill
+  20:	0008      	l32i.n	a0, a0, 0
+  22:	e40000        	extui	a0, a0, 0, 15
+  25:	000001        	l32r	a0, fffc0028 <_end+0xfffbec4c>
+  28:	000000        	ill
+  2b:	280400        	lsi	f0, a4, 160
+  2e:	e40000        	extui	a0, a0, 0, 15
+  31:	000001        	l32r	a0, fffc0034 <_end+0xfffbec58>
+  34:	000003        	lsi	f0, a0, 0
+  37:	000200        	lsi	f0, a2, 0
+  3a:	c00000        	sub	a0, a0, a0
+  3d:	000002        	l8ui	a0, a0, 0
+  40:	000000        	ill
+  43:	280400        	lsi	f0, a4, 160
+  46:	c00000        	sub	a0, a0, a0
+  49:	000002        	l8ui	a0, a0, 0
+  4c:	000003        	lsi	f0, a0, 0
+  4f:	000200        	lsi	f0, a2, 0
+  52:	ac0000        	lsi	f0, a0, 0x2b0
+  55:	000001        	l32r	a0, fffc0058 <_end+0xfffbec7c>
+  58:	000030        	lsi	f3, a0, 0
+  5b:	000100        	lsi	f0, a1, 0
+  5e:	e00000        	subx4	a0, a0, a0
+  61:	000001        	l32r	a0, fffc0064 <_end+0xfffbec88>
+  64:	000004        	lsi	f0, a0, 0
+  67:	000100        	lsi	f0, a1, 0
+  6a:	a00000        	addx4	a0, a0, a0
+  6d:	000001        	l32r	a0, fffc0070 <_end+0xfffbec94>
+  70:	000004        	lsi	f0, a0, 0
+  73:	000100        	lsi	f0, a1, 0
+  76:	fc0000        	lsi	f0, a0, 0x3f0
+  79:	000001        	l32r	a0, fffc007c <_end+0xfffbeca0>
+  7c:	000000        	ill
+  7f:	280400        	lsi	f0, a4, 160
+  82:	fc0000        	lsi	f0, a0, 0x3f0
+  85:	000001        	l32r	a0, fffc0088 <_end+0xfffbecac>
+  88:	000014        	lsi	f1, a0, 0
+  8b:	000200        	lsi	f0, a2, 0
+  8e:	100000        	and	a0, a0, a0
+  91:	000002        	l8ui	a0, a0, 0
+  94:	000002        	l8ui	a0, a0, 0
+  97:	002200        	lsi	f0, a2, 0
+  9a:	120000        	andbc	b0, b0, b0
+  9d:	000002        	l8ui	a0, a0, 0
+  a0:	000000        	ill
+  a3:	280800        	lsi	f0, a8, 160
+  a6:	140000        	extui	a0, a0, 0, 2
+  a9:	000002        	l8ui	a0, a0, 0
+  ac:	000021        	l32r	a2, fffc00ac <_end+0xfffbecd0>
+  af:	000200        	lsi	f0, a2, 0
+  b2:	350000        	extui	a0, a0, 16, 4
+  b5:	000002        	l8ui	a0, a0, 0
+  b8:	000002        	l8ui	a0, a0, 0
+  bb:	002200        	lsi	f0, a2, 0
+  be:	370000        	lsi	f0, a0, 220
+  c1:	000002        	l8ui	a0, a0, 0
+  c4:	000000        	ill
+  c7:	280800        	lsi	f0, a8, 160
+  ca:	380000        	lsi	f0, a0, 224
+  cd:	000002        	l8ui	a0, a0, 0
+  d0:	000021        	l32r	a2, fffc00d0 <_end+0xfffbecf4>
+  d3:	000200        	lsi	f0, a2, 0
+  d6:	590000        	s32nb	a0, a0, 0
+  d9:	000002        	l8ui	a0, a0, 0
+  dc:	000000        	ill
+  df:	000800        	lsi	f0, a8, 0
+  e2:	590000        	s32nb	a0, a0, 0
+  e5:	000002        	l8ui	a0, a0, 0
+  e8:	000023        	lsi	f2, a0, 0
+  eb:	002200        	lsi	f0, a2, 0
+  ee:	7c0000        	lsi	f0, a0, 0x1f0
+  f1:	000002        	l8ui	a0, a0, 0
+  f4:	000005        	call0	f8 <_init-0xec>
+  f7:	002200        	lsi	f0, a2, 0
+  fa:	810000        	src	a0, a0, a0
+  fd:	000002        	l8ui	a0, a0, 0
+ 100:	000002        	l8ui	a0, a0, 0
+ 103:	002200        	lsi	f0, a2, 0
+ 106:	830000        	moveqz	a0, a0, a0
+ 109:	000002        	l8ui	a0, a0, 0
+ 10c:	000000        	ill
+ 10f:	280800        	lsi	f0, a8, 160
+ 112:	840000        	extui	a0, a0, 0, 9
+ 115:	000002        	l8ui	a0, a0, 0
+ 118:	000015        	call4	11c <_init-0xc8>
+ 11b:	000200        	lsi	f0, a2, 0
+ 11e:	990000        	lsi	f0, a0, 0x264
+ 121:	000002        	l8ui	a0, a0, 0
+ 124:	000005        	call0	128 <_init-0xbc>
+ 127:	002200        	lsi	f0, a2, 0
+ 12a:	9e0000        	f64iter	a0, a0, a0, 1, 0
+ 12d:	000002        	l8ui	a0, a0, 0
+ 130:	000000        	ill
+ 133:	000800        	lsi	f0, a8, 0
+ 136:	000000        	ill
+ 139:	000013        	lsi	f1, a0, 0
+ 13c:	000000        	ill
+ 13f:	280400        	lsi	f0, a4, 160
+ 142:	080000        	lsx	f0, a0, a0
+ 145:	000013        	lsi	f1, a0, 0
+ 148:	000000        	ill
+ 14b:	280400        	lsi	f0, a4, 160
+ 14e:	bc0000        	lsi	f0, a0, 0x2f0
+ 151:	000013        	lsi	f1, a0, 0
+ 154:	000000        	ill
+ 157:	280400        	lsi	f0, a4, 160
+ 15a:	c30000        	movf	a0, a0, b0
+ 15d:	000002        	l8ui	a0, a0, 0
+ 160:	000006        	j	164 <_init-0x80>
+ 163:	000200        	lsi	f0, a2, 0
+ 166:	e70000        	lsi	f0, a0, 0x39c
+ 169:	000001        	l32r	a0, fffc016c <_end+0xfffbed90>
+ 16c:	000006        	j	170 <_init-0x74>
+ 16f:	000200        	lsi	f0, a2, 0
+ 172:	b80000        	lsi	f0, a0, 0x2e0
+ 175:	000002        	l8ui	a0, a0, 0
+ 178:	000000        	ill
+ 17b:	280400        	lsi	f0, a4, 160
+ 17e:	b80000        	lsi	f0, a0, 0x2e0
+ 181:	000002        	l8ui	a0, a0, 0
+ 184:	0008      	l32i.n	a0, a0, 0
+ 186:	020000        	andb	b0, b0, b0
+ 189:	000000        	ill
+ 18c:	0002c0        	callx0	a2
+ 18f:	000000        	ill
+ 192:	080000        	lsx	f0, a0, a0
+ 195:	000000        	ill
+ 198:	01dc      	bnez.n	a1, 1ac <_init-0x38>
+ 19a:	040000        	extui	a0, a0, 0, 1
+ 19d:	000000        	ill
+ 1a0:	000001        	l32r	a0, fffc01a0 <_end+0xfffbedc4>
+ 1a3:	01a400        	slli	a10, a4, 32
+ 1a6:	040000        	extui	a0, a0, 0, 1
+ 1a9:	000000        	ill
+ 1ac:	000001        	l32r	a0, fffc01ac <_end+0xfffbedd0>
+ 1af:	02a000        	andb	b10, b0, b0
+ 1b2:	000000        	ill
+ 1b5:	000000        	ill
+ 1b8:	002804        	lsi	f0, a8, 0
+ 1bb:	02a000        	andb	b10, b0, b0
+ 1be:	090000        	l32e	a0, a0, -64
+ 1c1:	000000        	ill
+ 1c4:	000002        	l8ui	a0, a0, 0
+ 1c7:	02a900        	andb	b10, b9, b0
+ 1ca:	000000        	ill
+ 1cd:	000000        	ill
+ 1d0:	0008      	l32i.n	a0, a0, 0
+ 1d2:	a90000        	lsi	f0, a0, 0x2a4
+ 1d5:	000002        	l8ui	a0, a0, 0
+ 1d8:	000d      	mov.n	a0, a0
+ 1da:	220000        	orb	b0, b0, b0
+ 1dd:	000000        	ill
+ 1e0:	0002b6        	bltui	a2, 0x8000, 1e4 <_init>
+ 1e3:	000000        	ill
+ 1e6:	080000        	lsx	f0, a0, a0
+ 1e9:	000000        	ill
+ 1ec:	001304        	lsi	f0, a3, 0
+ 1ef:	000000        	ill
+ 1f2:	040000        	extui	a0, a0, 0, 1
+ 1f5:	0028      	l32i.n	a2, a0, 0
+ 1f7:	130c00        	wsr.scompare1	a0
+ 1fa:	000000        	ill
+ 1fd:	000000        	ill
+ 200:	002804        	lsi	f0, a8, 0
+ 203:	13bc00        	lsi	f0, a12, 76
+ 206:	000000        	ill
+ 209:	000000        	ill
+ 20c:	002804        	lsi	f0, a8, 0
+ 20f:	01ed00        	slli	a14, a13, 32
+ 212:	060000        	lsi	f0, a0, 24
+ 215:	000000        	ill
+ 218:	000002        	l8ui	a0, a0, 0
+ 21b:	01f300        	slli	a15, a3, 32
+ 21e:	020000        	andb	b0, b0, b0
+ 221:	000000        	ill
+ 224:	000002        	l8ui	a0, a0, 0
+ 227:	01f500        	slli	a15, a5, 32
+ 22a:	000000        	ill
+ 22d:	000000        	ill
+ 230:	0008      	l32i.n	a0, a0, 0
+ 232:	c90000        	lsi	f0, a0, 0x324
+ 235:	000002        	l8ui	a0, a0, 0
+ 238:	000002        	l8ui	a0, a0, 0
+ 23b:	000200        	lsi	f0, a2, 0
+ 23e:	cb0000        	movf.s	f0, f0, b0
+ 241:	000002        	l8ui	a0, a0, 0
+ 244:	000000        	ill
+ 247:	000800        	lsi	f0, a8, 0
+	...
+
+Disassembly of section .debug_line_str:
+
+00000000 <.debug_line_str>:
+   0:	2f          	.byte 0x2f
+   1:	697562        	lsi	f6, a5, 0x1a4
+   4:	646c      	movi.n	a4, -26
+   6:	692f73        	lsi	f7, a15, 0x1a4
+   9:	2f6664        	lsi	f6, a6, 188
+   c:	6f7263        	lsi	f6, a2, 0x1bc
+   f:	747373        	lsi	f7, a3, 0x1d0
+  12:	6f          	.byte 0x6f
+  13:	6f          	.byte 0x6f
+  14:	2d6c      	movi.n	a13, -30
+  16:	4e          	.byte 0x4e
+  17:	2e2f47        	blt	a15, a4, 49 <_init-0x19b>
+  1a:	697562        	lsi	f6, a5, 0x1a4
+  1d:	646c      	movi.n	a4, -26
+  1f:	2f          	.byte 0x2f
+  20:	7478      	l32i.n	a7, a4, 28
+  22:	736e65        	call8	73708 <_end+0x7232c>
+  25:	652d61        	l32r	a6, fffd94dc <_end+0xfffd8100>
+  28:	337073        	lsi	f7, a0, 204
+  2b:	652d32        	l32i	a3, a13, 0x194
+  2e:	666c      	movi.n	a6, -26
+  30:	2f          	.byte 0x2f
+  31:	637273        	lsi	f7, a2, 0x18c
+  34:	2f          	.byte 0x2f
+  35:	6e          	.byte 0x6e
+  36:	6c7765        	call8	6c7ac <_end+0x6b3d0>
+  39:	6269      	s32i.n	a6, a2, 24
+  3b:	2f          	.byte 0x2f
+  3c:	696c      	movi.n	a9, -26
+  3e:	6c6762        	s32i	a6, a7, 0x1b0
+  41:	6f          	.byte 0x6f
+  42:	2f7373        	lsi	f7, a3, 188
+  45:	7478      	l32i.n	a7, a4, 28
+  47:	736e65        	call8	7372c <_end+0x72350>
+  4a:	630061        	l32r	a6, fffd8c4c <_end+0xfffd7870>
+  4d:	307472        	lsi	f7, a4, 192
+  50:	2e          	.byte 0x2e
+  51:	53          	.byte 0x53
+	...

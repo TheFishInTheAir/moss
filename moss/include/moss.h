@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include <spinlock.h>
+#include "esp_rom_sys.h"
+#include <stdarg.h>
 
 // TODO: put this into a config file
 #define DEBUG
@@ -27,12 +29,28 @@ void func(void);
 
 void moss_version(char* buf, uint32_t size);
 
+int moss_sp();
 int moss_core_id();
 void _moss_nop();
 void moss_interrupt_yield();
 void _moss_xt_dispatch();
 
-void _moss_log(const char*, ...);
+
+
+// this is all temp as fuck
+extern spinlock_t _slock;
+#define _moss_log(fmt, ...) { \
+    assert(spinlock_acquire(&_slock, SPINLOCK_WAIT_FOREVER)); \
+    esp_rom_printf(fmt "", ##__VA_ARGS__ );        \
+    spinlock_release(&_slock);  }
+
+
+
+//void _moss_log(const char*, ...);
+
+
+
+
 void _moss_log_acquire();
 void _moss_log_release();
 
