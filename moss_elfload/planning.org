@@ -1,0 +1,8 @@
+#+TITLE: Moss Elf Loader Planning
+#+AUTHOR: Ethan Breit
+
+* General milestone
+- [ ] Figure out memory requirements from elf
+- [ ] Check theres enough memory and then allocate
+- [ ] Copy in the correct memory sections as described by Elf
+- [ ] 

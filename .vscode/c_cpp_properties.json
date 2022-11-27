@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceRoot}/moss/include/**",
+                "${workspaceRoot}/moss_net/include/**",
                 "~/work/esp-idf/components/**"
             ],
             "defines": [],
@@ -17,6 +18,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceRoot}/moss/include/**",
+                "${workspaceRoot}/moss_net/include/**",
                 "~/Documents/libraries/esp/esp-idf/components/**"
             ],
             "defines": [],

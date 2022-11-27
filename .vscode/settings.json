@@ -14,7 +14,8 @@
         "complex": "c",
         "compare": "c",
         "wifi.h": "c",
-        "nvs_flash.h": "c"
+        "nvs_flash.h": "c",
+        "moss_net.h": "c"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/moss"
 
