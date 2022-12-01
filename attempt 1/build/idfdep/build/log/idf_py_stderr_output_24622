@@ -1,7 +1,0 @@
-/Users/ethanbreit/.espressif/tools/xtensa-esp32-elf/esp-2022r1-11.2.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/11.2.0/../../../../xtensa-esp32-elf/bin/ld: esp-idf/freertos/libfreertos.a(port_common.c.obj):(.literal.main_task+0x18): undefined reference to `app_main'
-/Users/ethanbreit/.espressif/tools/xtensa-esp32-elf/esp-2022r1-11.2.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/11.2.0/../../../../xtensa-esp32-elf/bin/ld: esp-idf/freertos/libfreertos.a(port_common.c.obj): in function `main_task':
-/Users/ethanbreit/Documents/libraries/esp/esp-idf/components/freertos/FreeRTOS-Kernel/portable/port_common.c:128: undefined reference to `app_main'
-collect2: error: ld returned 1 exit status
-make[3]: *** [idfdep.elf] Error 1
-make[2]: *** [CMakeFiles/idfdep.elf.dir/all] Error 2
-make[1]: *** [all] Error 2

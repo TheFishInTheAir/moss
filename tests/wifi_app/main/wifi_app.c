@@ -2,6 +2,7 @@
 #include <wifi.h>
 #include <nvs_flash.h>
 #include <esp_system.h>
+#include <moss_net.h>
 #include <network.h>
 
 void app_main()
@@ -18,7 +19,10 @@ void app_main()
     moss_wifi_init();
     moss_wifi_connect_default();
 
-    http_get_test();
+    
 
-    while(1){};
+    while(1)
+    {
+      moss_pull_test_prog();
+    }
 }

@@ -15,7 +15,10 @@
         "compare": "c",
         "wifi.h": "c",
         "nvs_flash.h": "c",
-        "moss_net.h": "c"
+        "moss_net.h": "c",
+        "err.h": "c",
+        "elfloader.h": "c",
+        "network.h": "c"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/moss"
 

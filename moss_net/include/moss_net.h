@@ -12,4 +12,4 @@
 #define MOSS_VERSION_MINOR 1
 
 
-void apppppp(void);
+void moss_pull_test_prog(void);

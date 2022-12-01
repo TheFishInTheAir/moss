@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceRoot}/moss/include/**",
+                "${workspaceRoot}/ext/elfloader/include/**",
                 "${workspaceRoot}/moss_net/include/**",
                 "~/work/esp-idf/components/**"
             ],
