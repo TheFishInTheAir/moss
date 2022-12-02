@@ -2,7 +2,7 @@
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <freertos-wifi.h>
+#include <freertos_wifi.h>
 
 #define PROFILING_PROCESS_LOOP_N (100000)
 int testing_thing = 0;
