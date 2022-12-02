@@ -1,1 +1,0 @@
-. $HOME/Documents/libraries/esp/esp-idf/export.sh
