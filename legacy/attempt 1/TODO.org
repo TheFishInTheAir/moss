@@ -1,7 +1,0 @@
-#+TITLE: Operating System Work in Progres#+BEGIN_SRC
-#+AUTHOR: Ethan Breit
-
-* Things to finalize
-** memory linkerscript processing
-** SDKConfig Find a less hacky way of using it
-** Make KConfig Files integral to buildsystem
