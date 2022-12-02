@@ -21,6 +21,7 @@ Restore esp-idf state
 ``sh
 idf.py moss_clean
 ``
+
 Remove moss from cached components
 
 ``sh
