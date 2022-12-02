@@ -52,9 +52,10 @@ int moss_instantiate_proc(moss_scheduler_context* ctx, moss_process** proc_ref,
     return MOSS_SUCCESS;
 }
 
+
 void _test_exit()
 {
-    assert(0 && "Something Really Bad Happened :)");
+    assert(0 && "Something Really Bad Happened");
 }
 
 // Interrupt Exit Handler
@@ -64,6 +65,8 @@ extern void _xt_user_exit();
 uint8_t* _moss_init_stack(moss_process* proc)
 {
     // Heavy Inspo from the freertos port code but simplified
+
+    // Be Very Very aware of pointer allignment here.
 
     uint8_t *sp, *tos;
     tos = (uint8_t*) ((int)proc->top_of_stack & ~0xf);
@@ -75,9 +78,6 @@ uint8_t* _moss_init_stack(moss_process* proc)
         *tp = 0xBF;
     }
 
-    // Possible that there are some allignment issues which are leading to the 
-    // Instruction failing
-
     XtExcFrame* frame = (XtExcFrame*) sp;
     frame->pc   = (moss_address) proc->entry_point;
     frame->a0   = 0;
@@ -87,8 +87,7 @@ uint8_t* _moss_init_stack(moss_process* proc)
     // This is the final call that loads PS PC and A0 
     frame->exit = (moss_address) _xt_user_exit; 
 
-    // TODO: figure out which flags to use.
-    //frame->ps = PS_UM | PS_EXCM;
+    // Manipulate process state to trick dispatcher into using pre-empted exit handler
     frame->ps = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
 
     //@Cleanup
@@ -171,23 +170,18 @@ int moss_delete_process(moss_scheduler_context* ctx, moss_process* proc)
     return MOSS_SUCCESS;
 }
 
-//TODO: delete process and free stack after this!
-// Can't delete stack here though, should have a cleanup phase.
+
 void moss_terminate()
 {
+    /// Mark process for deletion
     moss_current_process()->state = MOSS_PROCESS_STOPPED;
 
-    //@Cleanup
-    //moss_delete_process(moss_sched(), moss_current_process());
-    //moss_yield_without_queue();
     moss_ctx_switch();
 
-    // the call0 in dispatch is leading to some weird stuff
-    //_moss_dispatch();
+    // DO NOT DO CALL0 Dispatching here! Lead to massive headache.
 
 
-    assert(0 && "what the hell");
-    //_moss_dispatch();
+    assert(0 && "Got to unreachable code section");
 }
 
 
@@ -290,8 +284,6 @@ moss_process* moss_schedzuler_find_proc_pid(moss_scheduler_context* ctx, uint8_t
 
 int moss_scheduler_start_proc(moss_scheduler_context* ctx, moss_process* proc)
 {
-    //TODO: Remove Logging eventually.
-    //_moss_log("Starting Process %s\n", proc->identifier);
     PROP(moss_process_exec_queue_push(&ctx->queue, proc));
     return MOSS_SUCCESS;
 
@@ -305,8 +297,10 @@ int moss_scheduler_start(moss_scheduler_context* ctx)
 {
     _moss_dispatch();
 
+    assert(0 && "Got to Unreachable Code Section");
+
     // Should never reach here. TODO: make this a void func
-    return MOSS_SUCCESS;
+    return MOSS_FAIL
 }
 
 
@@ -348,7 +342,6 @@ void moss_process_exec_queue_debug_dump(moss_process_exec_queue* queue)
         moss_process* proc = *_moss_process_exec_queue_get_elem(queue, i);
         //printf("  (%d)  state %d  entry (%d)  instr (%d)\n", i, proc->state, (int)proc->entry_point, (int) proc->instruction_ptr);
 
-        //printf("Wow ok did that \n\n\n");
         _moss_log("  (%d) %s (STATE: %d, ENTRY: %#04X, INSTR: %#04X)\n", i, proc->identifier, proc->state,  (moss_address)proc->entry_point, *(int*)proc->top_of_stack);
     }
     spinlock_release(&queue->lock);
@@ -412,7 +405,7 @@ void _moss_prime_context_switch()
 {
     // This currently Functions as idle task.
     // Could be a bad idea to put that here, some of the issues that have arrisen
-    // are kind of due to this being blocking.
+    // are due to this being blocking inside a fairly critical section of code.
 
     int idling = 0;
 
@@ -456,7 +449,7 @@ void _moss_prime_context_switch()
             _moss_log("- No More Processes, Idling on Core %d\n", moss_core_id());
 
         idling = 1;
-        _moss_log("- Continuous Idling on Core %d\n", moss_core_id());
+        //_moss_log("- Continuous Idling on Core %d\n", moss_core_id());
 
         for(unsigned int i = 0; i < 100000; i++)
         {_moss_nop();}

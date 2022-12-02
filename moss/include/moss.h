@@ -35,21 +35,14 @@ void _moss_nop();
 void moss_interrupt_yield();
 void _moss_xt_dispatch();
 
-
-
-// this is all temp as fuck
+// this is all very temporary
 extern spinlock_t _slock;
 #define _moss_log(fmt, ...) { \
     assert(spinlock_acquire(&_slock, SPINLOCK_WAIT_FOREVER)); \
     esp_rom_printf(fmt "", ##__VA_ARGS__ );        \
     spinlock_release(&_slock);  }
 
-
-
 //void _moss_log(const char*, ...);
-
-
-
 
 void _moss_log_acquire();
 void _moss_log_release();

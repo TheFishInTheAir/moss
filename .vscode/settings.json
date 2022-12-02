@@ -18,7 +18,8 @@
         "moss_net.h": "c",
         "err.h": "c",
         "elfloader.h": "c",
-        "network.h": "c"
+        "network.h": "c",
+        "sockets.h": "c"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/moss"
 

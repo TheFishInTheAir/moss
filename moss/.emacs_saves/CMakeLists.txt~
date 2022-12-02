@@ -1,4 +1,0 @@
-# Add a file glob for this.
-idf_component_register(SRCS "src/moss.c" "src/startup.c"
-			    REQUIRES esp_timer esp_hw_support heap esp_app_format vfs hal
-			    INCLUDE_DIRS "include")	

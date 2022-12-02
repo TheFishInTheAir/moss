@@ -42,7 +42,8 @@ void _moss_log_release()
 
 
 // This is a temporary logging helper. Needed some synchronization for serial ownership
-// Eventually add 
+// Currently Unused
+// TODO: Cleanup
 void _moose_log(const char* format, ...)
 {
     assert(spinlock_acquire(&_slock, SPINLOCK_WAIT_FOREVER));

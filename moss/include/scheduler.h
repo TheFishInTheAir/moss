@@ -3,7 +3,7 @@
 #include <spinlock.h>
 
 // Not sure how to handle process storage, dynamic allocation will likely not be worth it. 
-#define MAX_PROCS 8*2 
+#define MAX_PROCS 16
 #define NUM_CORES 2
 #define PROC_ID_MAX 256
 
@@ -29,7 +29,7 @@ typedef struct _moss_process
     // a zero offset. 
     volatile uint8_t* top_of_stack;
 
-    // Flag for context save completion
+    // Flag for context save completion TODO: phase this out
     volatile int32_t primed;
 
 

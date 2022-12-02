@@ -34,15 +34,10 @@ void moss_portlvl_init()
     ESP_EARLY_LOGI(TAG, "Overriding Default Startup");
 
     ESP_EARLY_LOGI(TAG, "Pro cpu start use code");
+
     int cpu_freq = esp_clk_cpu_freq();
-
     ESP_EARLY_LOGI(TAG, "CPU FREQ: %d", cpu_freq);
-    
-    char buf[17];
-    esp_app_get_elf_sha256(buf, sizeof(buf));
-    ESP_EARLY_LOGI(TAG, "ELF file SHA256:  %s...", buf);
-    //    ESP_EARLY_LOGI(TAG, "ESP-IDF:          %s", app_desc->idf_ver);
-
+  
     // Heap Allocator
     heap_caps_init();
 
@@ -80,6 +75,8 @@ void moss_portlvl_init()
     ESP_EARLY_LOGI(TAG, "Disabled Boot Watchdog");
 
     ESP_EARLY_LOGI(TAG, "Unblocking Other Cores");
+
+    // This is defined in esp_system startup
     startup_resume_other_cores();
 
 
@@ -93,7 +90,6 @@ void moss_cpu1_init()
     {
         for(int i = 0; i < (10^4); i++)
         {
-            //TODO: make nop a macro instaed of a call to reduce the stack manipulation overhead
             _moss_nop();
         }
     }
@@ -101,35 +97,11 @@ void moss_cpu1_init()
 
 }
 
-void _moss_interrupt_init()
-{
-    //TODO: Setup Interrupts HERE!
-    esp_int_wdt_init();
-
-}
-
-// Temporary idle task for now
-void idle_task()
-{
-    int i = 0;
-    while(1)
-    {
-        moss_yield();
-        i++;
-    }
-}
-
-
 extern void app_main();
 void moss_kernel_init()
 {
     ESP_EARLY_LOGI(TAG, "Made it to kernel Init");
 
-    // TODO: deal with the interrupt nightmare later
-    //_moss_interrupt_init();
-
-    
-    // And interrupt watchdog
     // Init internal components
     moss_scheduler_init();
 
@@ -137,8 +109,7 @@ void moss_kernel_init()
     moss_process* main_proc;
     moss_instantiate_proc(moss_sched(), &main_proc, "moss_main", app_main, NULL);
 
-
-    //moss_process_exec_queue_debug_dump(&moss_sched()->queue);
+    // moss_process_exec_queue_debug_dump(&moss_sched()->queue);
 
     // Scheduler Init State has been setup, can now let other core resume operation.
     _sys_init_complete = 1;
