@@ -11,15 +11,10 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 
-
-
-#define MOSS_DEFAULT_WIFI_SSID "Apt 3"
-#define MOSS_DEFAULT_WIFI_PASS "augslambo"
-
 #define MOSS_WIFI_CONNECTED_BIT BIT0
 #define MOSS_WIFI_FAIL_BIT      BIT1
 
-#define TAG "moss_net_wifi"
+#define TAG "moss_wifi"
 
 typedef struct _moss_wifi_context
 {
@@ -91,6 +86,7 @@ int moss_wifi_connect_default()
 
 
     // This is not super necessary to be honest.
+    // Could be replaced by a moss_scheduler alternative fairly easily
     // Entirely just to hold up execution until succesful connection which may or may not be desirable.
     EventBits_t bits = xEventGroupWaitBits(ctx.s_wifi_event_group,
             MOSS_WIFI_CONNECTED_BIT | MOSS_WIFI_FAIL_BIT,

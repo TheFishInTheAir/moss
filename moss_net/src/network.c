@@ -18,15 +18,16 @@
 
 #define MAX_HTTP_RECV_BUFFER 512
 #define MAX_HTTP_OUTPUT_BUFFER 2048
-static const char *TAG = "Moss WIFI App";
+static const char *TAG = "moss_network";
 
 
-#define WEB_SERVER "10.0.0.171"
-#define WEB_PORT "8000"
-#define WEB_PATH "/text.txt"
 
-static const char *REQUEST = "GET " WEB_PATH " HTTP/1.0\r\n"
-    "Host: "WEB_SERVER":"WEB_PORT"\r\n"
+#define TEST_WEB_SERVER "10.0.0.171"
+#define TEST_WEB_PORT "8000"
+#define TEST_WEB_PATH "/text.txt"
+
+static const char *REQUEST = "GET " TEST_WEB_PATH " HTTP/1.0\r\n"
+    "Host: "TEST_WEB_SERVER":"TEST_WEB_PORT"\r\n"
     "User-Agent: esp-idf/1.0 esp32\r\n"
     "\r\n";
 
@@ -35,10 +36,8 @@ static const char *REQUEST_FORMAT = "GET %s HTTP/1.0\r\n"
     "Host: %s:%s\r\n"
     "User-Agent: esp-idf/1.0 esp32\r\n"
     "\r\n";
-// Start with the simplest thing
 
-
-void weird_delay()
+void arbitrary_delay()
 {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
@@ -52,7 +51,7 @@ int _moss_get_server_connection(char* server, char* port, int* s)
     struct addrinfo *res;
     struct in_addr *addr;
 
-    int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
+    int err = getaddrinfo(TEST_WEB_SERVER, TEST_WEB_PORT, &hints, &res);
     if(err != 0 || res == NULL) {
         ESP_LOGE(TAG, "DNS lookup failed err=%d res=%p", err, res);
         return MOSS_FAIL;
@@ -93,9 +92,6 @@ int moss_download_http_get(char* server, char* port, char* path, void* buf, uint
     int err;
     int s;
 
-
-    printf("This the request %s\n", request);
-
     err = _moss_get_server_connection(server, port, &s);
     if(err!=MOSS_SUCCESS)
     {
@@ -123,12 +119,15 @@ int moss_download_http_get(char* server, char* port, char* path, void* buf, uint
     ESP_LOGI(TAG, "... set socket receiving timeout success");
 
 
-    // Skip HTTP Headers
+    // Skip HTTP Headers, definetly not the best way to do this.
     {
         char mini_buf[4];
 
         while(1)
         {
+            // NOTE: Possible inifinite loop if malformed response
+            // TODO: Add Timeout Watchdog
+
             mini_buf[0] = mini_buf[1];
             mini_buf[1] = mini_buf[2];
             mini_buf[2] = mini_buf[3];
@@ -140,21 +139,11 @@ int moss_download_http_get(char* server, char* port, char* path, void* buf, uint
                 {
                     break;
                 }
-            // Possible inifinite loop
         }
-
-
     }
-
 
     // Read HTTP response 
     read(s, buf, buf_size);
-
-    for(int i = 0; i < 4; i++) 
-    {
-        // Print the contents of HTTP Response Character by character
-        printf("%d\n", ((uint8_t*)buf)[i]);
-    }
 
     close(s);
     return MOSS_SUCCESS;
@@ -173,43 +162,36 @@ void http_get_test()
 
     while(1) {
 
+        int err = getaddrinfo(TEST_WEB_SERVER, TEST_WEB_PORT, &hints, &res);
 
-        // Some mysterious ass function right here
-        int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
-
-        // res seems like a resolved address
-
+        // res is the resolved address
         if(err != 0 || res == NULL) {
             ESP_LOGE(TAG, "DNS lookup failed err=%d res=%p", err, res);
-            weird_delay();
+            arbitrary_delay();
             continue;
         }
 
-        // Code to print the resolved IP.
-
+        // Print the resolved IP.
         // Note: inet_ntoa is non-reentrant, look at ipaddr_ntoa_r for "real" code 
         addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
         ESP_LOGI(TAG, "DNS lookup succeeded. IP=%s", inet_ntoa(*addr));
-
-        // START OF THE REAL NETCODEEEE 
 
         // Socket allocation
         s = socket(res->ai_family, res->ai_socktype, 0);
         if(s < 0) {
             ESP_LOGE(TAG, "... Failed to allocate socket.");
             freeaddrinfo(res);
-            weird_delay();
+            arbitrary_delay();
             continue;
         }
         ESP_LOGI(TAG, "... allocated socket");
-
 
         // Socket Connection
         if(connect(s, res->ai_addr, res->ai_addrlen) != 0) {
             ESP_LOGE(TAG, "... socket connect failed errno=%d", errno);
             close(s);
             freeaddrinfo(res);
-            weird_delay();
+            arbitrary_delay();
             continue;
         }
 
@@ -217,13 +199,12 @@ void http_get_test()
         freeaddrinfo(res);
 
 
-        // Send our request
-        // this stuff is super straightforward tbh.
+        // Send the request
 
         if (write(s, REQUEST, strlen(REQUEST)) < 0) {
             ESP_LOGE(TAG, "... socket send failed");
             close(s);
-            weird_delay();
+            arbitrary_delay();
             continue;
         }
         ESP_LOGI(TAG, "... socket send success");
@@ -236,11 +217,10 @@ void http_get_test()
                 sizeof(receiving_timeout)) < 0) {
             ESP_LOGE(TAG, "... failed to set socket receiving timeout");
             close(s);
-            weird_delay();
+            arbitrary_delay();
             continue;
         }
         ESP_LOGI(TAG, "... set socket receiving timeout success");
-
 
 
         // Read HTTP response 
@@ -258,7 +238,7 @@ void http_get_test()
         close(s);
         for(int countdown = 10; countdown >= 0; countdown--) {
             ESP_LOGI(TAG, "%d... ", countdown);
-            weird_delay();
+            arbitrary_delay();
         }
         ESP_LOGI(TAG, "Starting again!");
     }

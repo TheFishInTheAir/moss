@@ -88,8 +88,8 @@ void context_switching_test()
 
 void app_main(void)
 {
-    //context_switching_test();
-    run_wifi_test();
+    context_switching_test();
+    //run_wifi_test();
 
     while(1);
 }

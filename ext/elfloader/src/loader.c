@@ -73,7 +73,7 @@ typedef struct ELFLoaderContext_t ELFLoaderContext_t;
 
 #else
 
-static const char* TAG = "elfLoader";
+static const char* TAG = "elf_loader";
 #define MSG(...) ESP_LOGI(TAG,  __VA_ARGS__);
 #define ERR(...) ESP_LOGE(TAG,  __VA_ARGS__);
 
@@ -81,8 +81,8 @@ static const char* TAG = "elfLoader";
 // silly wacky goofy stuff
 //#define MSG(...) {}
 //#define ERR(...) {}
-#define MSG(...) printf(__VA_ARGS__); printf("\n");
-#define ERR(...) printf(__VA_ARGS__); printf("\n");
+//#define MSG(...) printf(__VA_ARGS__); printf("\n");
+//#define ERR(...) printf(__VA_ARGS__); printf("\n");
 
 
 #include "esp_system.h"
@@ -538,13 +538,13 @@ int elfLoaderSetFunc(ELFLoaderContext_t *ctx, const char* funcname) {
         if(strcmp(name, funcname) == 0) {
             Elf32_Addr symAddr = findSymAddr(ctx, &sym, name);
             if (symAddr == 0xffffffff) {
-                //MSG("  %04X %-30s %04X %08X %04X ????????", symCount, name, sym.st_shndx, sym.st_value, sym.st_size);
+                MSG("  %04X %-30s %04X %08lX %04lX ????????", symCount, name, sym.st_shndx, sym.st_value, sym.st_size);
             } else {
                 ctx->exec = (void*)symAddr;
-                //MSG("  %04X %-30s %04X %08X %04X %08X", symCount, name, sym.st_shndx, sym.st_value, sym.st_size, symAddr);
+                MSG("  %04X %-30s %04X %08lX %04lX %08lX", symCount, name, sym.st_shndx, sym.st_value, sym.st_size, symAddr);
             }
         } else {
-            //MSG("  %04X %-30s %04X %08X %04X", symCount, name, sym.st_shndx, sym.st_value, sym.st_size);
+            MSG("  %04X %-30s %04X %08lX %04lX", symCount, name, sym.st_shndx, sym.st_value, sym.st_size);
         }
     }
     if (ctx->exec == 0) {

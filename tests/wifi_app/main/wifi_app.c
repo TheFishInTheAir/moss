@@ -5,6 +5,9 @@
 #include <moss_net.h>
 #include <network.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 void app_main()
 {
     esp_err_t ret = nvs_flash_init();
@@ -15,14 +18,13 @@ void app_main()
     ESP_ERROR_CHECK(ret);
 
 
-    printf("Got to Main.\n");
     moss_wifi_init();
     moss_wifi_connect_default();
-
-    
 
     while(1)
     {
       moss_pull_test_prog();
+      
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }

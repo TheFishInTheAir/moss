@@ -95,9 +95,6 @@ void _matrix_test_multiply()
     moss_semaphore_signal(&completion);
 
     moss_terminate();
-
-    assert(0&&"Makes no sense");
-    _moss_log("what the actual fuck tho.\n");
 }
 
 void matrix_test_multi_threaded()
@@ -129,16 +126,13 @@ void matrix_test_multi_threaded()
     {
         moss_semaphore_wait(&completion);
         complete++;       
-        
-         _moss_log("thing happended\n");
-
     }
 }
 
 void matrix_test_run_test(int size)
 {
     matrix_test_init(size);
-    if(matrix_size<64 && 0)
+    if(matrix_size<8)
     {
         _moss_log("Matrix A:\n");
         for(int i = 0; i < matrix_size; i++)
@@ -190,25 +184,12 @@ void matrix_test_run_test(int size)
 }
 
 
-// NOTE EROR IS LIKELY FROM PROCESS BUFFER OVERFLOW
 void matrix_test_run_suite()
 {
     _moss_log("---Running Matrix Multiplication Test Suite---\n");
     matrix_test_run_test(16);
     matrix_test_run_test(32);
-
-
-    matrix_test_run_test(16);
-    matrix_test_run_test(32);
-    matrix_test_run_test(16);
-    matrix_test_run_test(32);
-    matrix_test_run_test(16);
-    matrix_test_run_test(32);
-    matrix_test_run_test(16);
-    matrix_test_run_test(32);
-
-
-
-    //matrix_test_run_test(100);
-    matrix_test_run_test(69);
+    matrix_test_run_test(42);
+    matrix_test_run_test(64);
+    matrix_test_run_test(80);
 }

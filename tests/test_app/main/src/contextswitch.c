@@ -9,7 +9,7 @@
 
 
 
-#define PROFILING_PROCESS_LOOP_N (5000)
+#define PROFILING_PROCESS_LOOP_N (100000)
 int testing_thing = 0;
 volatile int complete = 0;
 
@@ -58,7 +58,6 @@ void context_switching_test()
 
     moss_instantiate_proc(moss_sched(), NULL, "hang_cpu1", hang_cpu1, NULL);
 
-
     int64_t fstart = esp_timer_get_time();
     _moss_log("Start Time: %lld\n", fstart);
 
@@ -87,7 +86,6 @@ void context_switching_test()
         id[14] = i+48;
         _moss_log("Making new proc '%s'\n", id);
 
-        //xTaskCreatePinnedToCore(profiling_process, "profiling_proc", 126*4, NULL, 1, &handle, 0);
         moss_instantiate_proc(moss_sched(), NULL, id, profiling_process, NULL);
     }
 
@@ -113,6 +111,5 @@ void context_switching_test()
 
     // Using Printf for float formatting
     printf("Switch Overhead Avg: %f\n", (double)overhead/(double)(end_switches-start_switches));
-    //_moss_log();
-
+    
 }
