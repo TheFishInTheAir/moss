@@ -7,23 +7,20 @@ The goal will be to eventually get moss_net running on-top of moss (it currently
 
 ## Warning When Building Moss
 This is a heads-up that building moss will modify some files in the esp-idf directory. To undo any changes to esp-idf the following command can be used.
-
-``sh
+```sh
 idf.py moss_clean
-``
+```
 
 ## Building Tests
 The wifi_app relies on the provided test_server running. 
 A note when going from a moss test to a moss_net test. As moss and FreeRTOS are incompatible, a full clean is required before a FreeRTOS test can be succesfully built and ran.
 
 1. Restore esp-idf state
-
-``sh
+```sh
 idf.py moss_clean
-``
+```
 
 2. Remove moss from cached components
-
-``sh
+```sh
 idf.py fullclean
-``
+```
