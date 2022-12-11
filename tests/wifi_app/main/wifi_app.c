@@ -8,6 +8,17 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+void ping_test()
+{
+
+  while(1)
+  {
+    moss_udp_ping_latency_test();
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+}
+
 void app_main()
 {
     esp_err_t ret = nvs_flash_init();
@@ -20,6 +31,13 @@ void app_main()
 
     moss_wifi_init();
     moss_wifi_connect_default();
+
+
+    // Do ping test instead
+    ping_test();
+
+    printf("the fuck\n");
+
 
     while(1)
     {

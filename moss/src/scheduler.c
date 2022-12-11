@@ -300,7 +300,7 @@ int moss_scheduler_start(moss_scheduler_context* ctx)
     assert(0 && "Got to Unreachable Code Section");
 
     // Should never reach here. TODO: make this a void func
-    return MOSS_FAIL
+    return MOSS_FAIL;
 }
 
 

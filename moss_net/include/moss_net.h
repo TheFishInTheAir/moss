@@ -12,4 +12,5 @@
 #define MOSS_VERSION_MINOR 1
 
 
-void moss_pull_test_prog(void);
+void moss_pull_test_prog();
+void moss_udp_ping_latency_test();
